@@ -10,6 +10,6 @@ router.post("/register", upload.single("photo"), userController.create);
 router.post("/login", userController.login);
 
 // PHOTO DE PROFIL
-router.post("/photo", upload.single("photo"), userController.photo);
+router.put("/photo", upload.single("photo"), userController.photo);
 
 module.exports = router;
