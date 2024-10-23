@@ -9,11 +9,18 @@ const create = async (req, res) => {
   try {
     const host = req.get("host");
     const photo = req.file;
-    const { username, genre, city, email, phone, password } = req.body;
-    if (!username) {
+    const { firstname, lastname, genre, city, email, phone, password } = req.body;
+    if (!firstname) {
       return res.status(400).json({
         status: "error",
         message: "Le nom d'utilisateur est obligatoire.",
+      });
+    }
+
+    if (!lastname) {
+      return res.status(400).json({
+        status: "error",
+        message: "Le prenom d'utilisateur est obligatoire.",
       });
     }
 
@@ -78,7 +85,8 @@ const create = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      username,
+      firstname,
+      lastname,
       genre,
       city,
       email,
@@ -97,7 +105,8 @@ const create = async (req, res) => {
     );
 
     const response = {
-      username: user.username,
+      firstname: user.firstname,
+      lastname: user.username,
       genre: user.genre,
       birthday: user.birthday,
       city: user.city,
@@ -163,7 +172,8 @@ const login = async (req, res) => {
     );
 
     const response = {
-      username: user.username,
+      firstname: user.firstname,
+      lastname: user.username,
       genre: user.genre,
       birthday: user.birthday,
       genre: user.genre,
