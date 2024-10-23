@@ -16,11 +16,11 @@ module.exports = (sequelize, DataTypes) => {
   User.init({
     username: DataTypes.STRING,
     genre: DataTypes.ENUM('Homme', 'Femme'),
-    birthday: DataTypes.DATEONLY,
     city: DataTypes.STRING,
     email: DataTypes.STRING,
     phone: DataTypes.STRING,
     photo: DataTypes.STRING,
+    thumbnail: DataTypes.STRING,
     password: DataTypes.STRING
   }, {
     sequelize,

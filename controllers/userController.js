@@ -9,7 +9,7 @@ const create = async (req, res) => {
   try {
     const host = req.get("host");
     const photo = req.file;
-    const { username, genre, birthday, city, email, phone, password } = req.body;
+    const { username, genre, city, email, phone, password } = req.body;
     if (!username) {
       return res.status(400).json({
         status: "error",
@@ -80,11 +80,11 @@ const create = async (req, res) => {
     const user = await User.create({
       username,
       genre,
-      birthday,
       city,
       email,
       phone,
-      photo: imageUrl,
+      photo: imageUrl ?? null,
+      thumbnail: thumbnailUrl ?? null,
       password: hashedPassword,
     });
 
@@ -170,6 +170,8 @@ const login = async (req, res) => {
       city: user.city,
       email: user.email,
       phone: user.phone,
+      photo: user.photo,
+      thumbnail: user.thumbnail,
       token,
     };
 

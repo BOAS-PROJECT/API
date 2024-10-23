@@ -17,10 +17,6 @@ module.exports = {
         type: Sequelize.ENUM('Homme', 'Femme'),
         allowNull: false,
       },
-      birthday: {
-        type: Sequelize.DATEONLY,
-        allowNull: false
-      },
       city: {
         type: Sequelize.STRING,
         allowNull: false
@@ -36,6 +32,10 @@ module.exports = {
         unique: true
       },
       photo: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      thumbnail: {
         type: Sequelize.STRING,
         allowNull: true
       },
