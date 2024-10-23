@@ -1,0 +1,29 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "P@dminB@s24",
+    "database": "database_boas_dev",
+    "host": "180.149.196.12",
+    "dialect": "postgres",
+    "port": 5432,
+    "timezone": "Africa/Brazzaville"
+  },
+  "test": {
+    "username": "postgres",
+    "password": "P@dminB@s24",
+    "database": "database_boas_test",
+    "host": "180.149.196.12",
+    "dialect": "postgres",
+    "port": 5432,
+    "timezone": "Africa/Brazzaville"
+  },
+  "production": {
+    "username": "postgres",
+    "password": "P@dminB@s24",
+    "database": "database_boas_prod",
+    "host": "180.149.196.12",
+    "dialect": "postgres",
+    "port": 5432,
+    "timezone": "Africa/Brazzaville"
+  }
+}
