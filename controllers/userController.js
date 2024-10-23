@@ -1,10 +1,14 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const sharp = require("sharp");
+const path = require("path");
 const { User } = require("../models");
 const { appendErrorLog } = require("../utils/logging");
 
 const create = async (req, res) => {
   try {
+    const host = req.get("host");
+    const photo = req.file;
     const { username, genre, birthday, city, email, phone, password } = req.body;
     if (!username) {
       return res.status(400).json({
@@ -59,6 +63,18 @@ const create = async (req, res) => {
       });
     }
 
+     // Générez et enregistrez l'image et le thumbnail
+     const imagePath = `users/${photo.filename}`;
+     const imageUrl = `${req.protocol}://${host}/${imagePath}`;
+     const thumbnailFilename = `thumb_${photo.filename}`;
+     const thumbnailPath = `users/${thumbnailFilename}`;
+     const thumbnailUrl = `${req.protocol}://${host}/${thumbnailPath}`;
+ 
+     // Créer le thumbnail avec sharp
+     await sharp(photo.path)
+       .resize(200, 200) // Taille du thumbnail
+       .toFile(path.join(__dirname, `../public/${thumbnailPath}`));
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
@@ -68,6 +84,7 @@ const create = async (req, res) => {
       city,
       email,
       phone,
+      photo: imageUrl,
       password: hashedPassword,
     });
 
