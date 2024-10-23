@@ -106,7 +106,7 @@ const create = async (req, res) => {
 
     const response = {
       firstname: user.firstname,
-      lastname: user.username,
+      lastname: user.lastname,
       genre: user.genre,
       birthday: user.birthday,
       city: user.city,
@@ -173,7 +173,7 @@ const login = async (req, res) => {
 
     const response = {
       firstname: user.firstname,
-      lastname: user.username,
+      lastname: user.lastname,
       genre: user.genre,
       birthday: user.birthday,
       genre: user.genre,
