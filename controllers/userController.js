@@ -190,4 +190,97 @@ const login = async (req, res) => {
   }
 }
 
-module.exports = { create, login };
+const photo = async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+    const host = req.get("host");
+    const photo = req.file;
+    // Récupérer le worker et vérifier s'il existe
+    if (!token) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token non fourni." });
+    }
+
+    // Vérifie si l'en-tête commence par "Bearer "
+    if (!token.startsWith("Bearer ")) {
+      return res.status(401).json({
+        status: "error",
+        message: "Format de token invalide.",
+      });
+    }
+
+    // Extrait le token en supprimant le préfixe "Bearer "
+    const customToken = token.substring(7);
+    let decodedToken;
+
+    try {
+      decodedToken = jwt.verify(customToken, process.env.JWT_SECRET);
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .json({ status: "error", message: "TokenExpiredError" });
+      }
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token invalide." });
+    }
+
+    const userId = decodedToken.id;
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message:
+          "Compte non trouvé. Veuillez réessayer ou en créer un nouveau.",
+      });
+    }
+
+    if (!photo) {
+      return res.status(400).json({
+        status: "error",
+        message: "La photo est requise.",
+      });
+    }
+
+    // Générez et enregistrez l'image et le thumbnail
+    const imagePath = `users/${photo.filename}`;
+    const imageUrl = `${req.protocol}://${host}/${imagePath}`;
+    const thumbnailFilename = `thumb_${photo.filename}`;
+    const thumbnailPath = `users/${thumbnailFilename}`;
+    const thumbnailUrl = `${req.protocol}://${host}/${thumbnailPath}`;
+
+    // Créer le thumbnail avec sharp
+    await sharp(photo.path)
+      .resize(200, 200) // Taille du thumbnail
+      .toFile(path.join(__dirname, `../public/${thumbnailPath}`));
+
+    // Mettre à jour le profil avec l'image et le thumbnail
+    await user.update(
+      { photo: imageUrl, thumbnail: thumbnailUrl }, // Enregistre l'URL de la photo et du thumbnail
+      { where: { id: userId } }
+    );
+
+    const response = {
+      photo: imageUrl,
+      thumbnail: thumbnailUrl,
+    };
+
+    return res.status(200).json({
+      status: "success",
+      message: "Votre photo de profil a éte mise à jour avec succes.",
+      data: response,
+    });
+  } catch (error) {
+    console.error(`ERROR UPDATE PHOTO USER: ${error}`);
+    appendErrorLog(`ERROR UPDATE PHOTO USER: ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message: "Une erreur s'est produite lors de la mise à jour de la photo.",
+    });
+  }
+};
+
+module.exports = { create, login, photo };

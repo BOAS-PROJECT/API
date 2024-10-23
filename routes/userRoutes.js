@@ -9,4 +9,7 @@ router.post("/register", upload.single("photo"), userController.create);
 // CONNEXION
 router.post("/login", userController.login);
 
+// PHOTO DE PROFIL
+router.post("/photo", upload.single("photo"), userController.photo);
+
 module.exports = router;
