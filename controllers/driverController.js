@@ -89,14 +89,12 @@ const create = async (req, res) => {
         message: "Cette plaque d'immatriculation est déjà utilisée.",
       });
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
+    
     await Driver.create({
       firstName,
       lastName,
       maritalStatus: status,
       numberPlate: plate,
-      password: hashedPassword,
       phone,
       birthday: birthday,
       city: city,
