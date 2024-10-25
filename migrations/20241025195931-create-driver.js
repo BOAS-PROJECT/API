@@ -51,6 +51,14 @@ module.exports = {
         allowNull: false,
         defaultValue: false
       },
+      photo: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      thumbnail: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
       token: {
         type: Sequelize.STRING,
         allowNull: true
