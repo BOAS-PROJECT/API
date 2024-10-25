@@ -98,8 +98,8 @@ const create = async (req, res) => {
       numberPlate: plate,
       password: hashedPassword,
       phone,
-      birthday,
-      city,
+      birthday: birthday,
+      city: city,
       quarter,
     });
 
@@ -113,7 +113,7 @@ const create = async (req, res) => {
     appendErrorLog(`ERROR CREATE ACCOUNT DRIVER: ${error}`);
     return res.status(500).json({
       status: "error",
-      message: "Une erreur s'est produite lors de la creation du compte.",
+      message: `Une erreur s'est produite lors de la creation du compte. ${error}`,
     });
   }
 };
