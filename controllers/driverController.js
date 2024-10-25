@@ -213,7 +213,7 @@ const login = async (req, res) => {
       });
     }
 
-    const driver = await Driver.findOne({ where: { phone, isActive: true }, attributes: ["id", "firstName", "lastName", "maritalStatus", "numberPlate", "phone", "birthday, city", "quarter"] });
+    const driver = await Driver.findOne({ where: { phone, isActive: true }, attributes: ["id", "firstName", "lastName", "maritalStatus", "numberPlate", "phone", "birthday, city", "quarter", "photo", "thumbnail"] });
     if (!driver) {
       return res.status(400).json({
         status: "error",
@@ -239,6 +239,8 @@ const login = async (req, res) => {
       birthday: driver.birthday,
       city: driver.city,
       quarter: driver.quarter,
+      photo: driver.photo,
+      thumbnail: driver.thumbnail,
       token: token
     };
 
