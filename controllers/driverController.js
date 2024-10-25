@@ -256,4 +256,4 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { create, validateAccount };
+module.exports = { create, validateAccount, listActiveDrivers, login };
