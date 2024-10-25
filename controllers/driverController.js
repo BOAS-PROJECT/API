@@ -14,7 +14,7 @@ const create = async (req, res) => {
       birthday,
       city,
       quarter,
-    } = body;
+    } = req.body;
 
     if (!firstName) {
       return res.status(400).json({
