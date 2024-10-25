@@ -7,6 +7,7 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const fs = require("fs");
 const userRoutes = require("./routes/userRoutes");
+const driverRoutes = require("./routes/driverRoutes");
 
 // Init express app
 const app = express();
@@ -19,6 +20,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Middleware to create the destination folder for public
 const createUploadsUsersFolder = (req, res, next) => {
   const folderPath = "public/users";
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath, { recursive: true });
+  }
+  next();
+};
+
+const createUploadsDriverFolder = (req, res, next) => {
+  const folderPath = "public/drivers";
   if (!fs.existsSync(folderPath)) {
     fs.mkdirSync(folderPath, { recursive: true });
   }
@@ -55,6 +64,7 @@ app.use(
 
 // Routes
 app.use("/api/v1/user", createUploadsUsersFolder, userRoutes);
+app.use('/api/v1/driver',createUploadsDriverFolder,  driverRoutes);
 
 // Export app
 const port = process.env.PORT || 3000;
