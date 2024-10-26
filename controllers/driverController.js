@@ -90,7 +90,7 @@ const create = async (req, res) => {
       });
     }
     
-    await Driver.create({
+   const driver =  await Driver.create({
       firstName,
       lastName,
       maritalStatus: status,
@@ -101,10 +101,30 @@ const create = async (req, res) => {
       quarter,
     });
 
+    const token = jwt.sign({ id: driver.id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    driver.token = token;
+    await driver.save();
+
+    const responseFormated = {
+      firstName: driver.firstName,
+      lastName: driver.lastName,
+      status: driver.maritalStatus,
+      plate: driver.numberPlate,
+      phone: driver.phone,
+      birthday: driver.birthday,
+      city: driver.city,
+      quarter: driver.quarter,
+      token: token,
+    };
+
     return res.status(201).json({
       status: "success",
       message:
         "Compte creé avec succes et est en attente de validation, veuillez passer à l'agence BOAS Service pour valication du compte.",
+      data: responseFormated,
     });
   } catch (error) {
     console.error(`ERROR CREATE ACCOUNT DRIVER: ${error}`);
