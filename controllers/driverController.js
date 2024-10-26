@@ -117,7 +117,7 @@ const create = async (req, res) => {
     return res.status(201).json({
       status: "success",
       message:
-        "Compte creé avec succes et est en attente de validation, veuillez passer à l'agence BOAS Service pour valication du compte.",
+        "otre compte a été créé avec succès et est actuellement en attente de validation. Nous vous invitons à vous rendre à l'agence BOAS Service pour finaliser la vérification de votre compte.",
       data: responseFormated,
     });
   } catch (error) {
