@@ -111,12 +111,6 @@ const create = async (req, res) => {
     const responseFormated = {
       firstName: driver.firstName,
       lastName: driver.lastName,
-      status: driver.maritalStatus,
-      plate: driver.numberPlate,
-      phone: driver.phone,
-      birthday: driver.birthday,
-      city: driver.city,
-      quarter: driver.quarter,
       token: token,
     };
 
