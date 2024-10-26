@@ -201,11 +201,10 @@ const listActiveDrivers = async (req, res) => {
   }
 };
 
-
 const listInActiveDrivers = async (req, res) => {
   try {
     const drivers = await Driver.findAll(
-      { where: { isActive: false }, attributes: { exclude: ["password", "isActive", "createdAt"] } },
+      { where: { isActive: false }, attributes: { exclude: ["password", "isActive", "createdAt", "token", "updatedAt"] } },
       { order: [["name", "DESC"]] }
     );
 
