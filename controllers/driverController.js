@@ -132,15 +132,9 @@ const create = async (req, res) => {
 
 const validateAccount = async (req, res) => {
   try {
-    const { phone, password } = req.body;
-    if (!phone) {
-      return res.status(400).json({
-        status: "error",
-        message: "Le numéro de téléphone est obligatoire.",
-      });
-    }
+    const { driverId, password } = req.body;
 
-    const driver = await Driver.findOne({ where: { phone } });
+    const driver = await Driver.findOne({ id: { driverId } });
     if (!driver) {
       return res.status(400).json({
         status: "error",
