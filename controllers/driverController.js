@@ -201,6 +201,36 @@ const listActiveDrivers = async (req, res) => {
   }
 };
 
+
+const listInActiveDrivers = async (req, res) => {
+  try {
+    const drivers = await Driver.findAll(
+      { where: { isActive: false }, attributes: { exclude: ["password", "isActive", "createdAt"] } },
+      { order: [["name", "DESC"]] }
+    );
+
+    const formattedDrivers = drivers.map((driver) => {
+      const formattedDriver = driver.toJSON();
+      return {
+        ...formattedDriver,
+        fullName: `${formattedDriver.firstName} ${formattedDriver.lastName}`,
+      };
+    });
+
+    return res.status(200).json({
+      status: "success",
+      data: formattedDrivers,
+    });
+  } catch (error) {
+    console.error(`ERROR LIST ACTIVE DRIVER: ${error}`);
+    appendErrorLog(`ERROR LIST ACTIVE DRIVER: ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message: "Une erreur s'est produite lors de la creation du compte.",
+    });
+  }
+};
+
 const login = async (req, res) => {
   try {
     const { phone, password } = req.body;
@@ -278,4 +308,4 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { create, validateAccount, listActiveDrivers, login };
+module.exports = { create, validateAccount, listActiveDrivers, login, listInActiveDrivers };

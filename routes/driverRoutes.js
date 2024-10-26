@@ -14,4 +14,7 @@ router.put("/validate-account", driverController.validateAccount);
 // LISTE DES CONDUCTEURS ACTIFS
 router.get("/list-active-drivers", driverController.listActiveDrivers);
 
+// LISTE DES CONDUCTEURS ACTIFS
+router.get("/list-inactive-drivers", driverController.listInActiveDrivers);
+
 module.exports = router;
