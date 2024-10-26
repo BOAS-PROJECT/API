@@ -8,6 +8,7 @@ const helmet = require("helmet");
 const fs = require("fs");
 const userRoutes = require("./routes/userRoutes");
 const driverRoutes = require("./routes/driverRoutes");
+const ownnerRoutes = require("./routes/ownnerRoutes");
 
 // Init express app
 const app = express();
@@ -28,6 +29,14 @@ const createUploadsUsersFolder = (req, res, next) => {
 
 const createUploadsDriverFolder = (req, res, next) => {
   const folderPath = "public/drivers";
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath, { recursive: true });
+  }
+  next();
+};
+
+const createUploadsOwnersFolder = (req, res, next) => {
+  const folderPath = "public/owners";
   if (!fs.existsSync(folderPath)) {
     fs.mkdirSync(folderPath, { recursive: true });
   }
@@ -65,6 +74,8 @@ app.use(
 // Routes
 app.use("/api/v1/user", createUploadsUsersFolder, userRoutes);
 app.use('/api/v1/driver',createUploadsDriverFolder,  driverRoutes);
+app.use('/api/v1/owner',createUploadsOwnersFolder, ownnerRoutes);
+
 
 // Export app
 const port = process.env.PORT || 3000;
