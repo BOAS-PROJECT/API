@@ -225,6 +225,14 @@ const login = async (req, res) => {
       });
     }
 
+    const existingDriver = await Driver.findOne({ where: { phone, isActive: false } });
+    if (existingDriver) {
+      return res.status(400).json({
+        status: "error",
+        message: "Votre compte a bien été créé et est en attente de validation. Merci de vous présenter à l'agence BOAS Service pour finaliser la vérification et l'activation de votre compte.",
+      })
+    }
+
     const driver = await Driver.findOne({ where: { phone, isActive: true } });
     if (!driver) {
       return res.status(400).json({
