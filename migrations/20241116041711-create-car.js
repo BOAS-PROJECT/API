@@ -53,11 +53,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      priceDay: {
-        type: Sequelize.DOUBLE,
-        allowNull: false,
-        defaultValue: 0
-      },
       isDriver: {
         type: Sequelize.BOOLEAN,
         allowNull: false,

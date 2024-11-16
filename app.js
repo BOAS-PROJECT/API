@@ -11,6 +11,8 @@ const serviceAccount = require("./utils/boasapp-4b0c1-firebase-adminsdk-jgcg2-55
 const userRoutes = require("./routes/userRoutes");
 const driverRoutes = require("./routes/driverRoutes");
 const ownnerRoutes = require("./routes/ownnerRoutes");
+const makeRoutes = require("./routes/makeRoutes");
+const carRoutes = require("./routes/carRoutes");
 
 // Init express app
 const app = express();
@@ -50,6 +52,15 @@ const createUploadsOwnersFolder = (req, res, next) => {
   next();
 };
 
+const createUploadsCarsFolder = (req, res, next) => {
+  const folderPath = "public/cars";
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath, { recursive: true });
+  }
+  next();
+};
+
+
 // Public directory
 app.use(express.static("public"));
 
@@ -81,9 +92,10 @@ app.use(
 
 // Routes
 app.use("/api/v1/user", createUploadsUsersFolder, userRoutes);
-app.use('/api/v1/driver',createUploadsDriverFolder,  driverRoutes);
-app.use('/api/v1/owner',createUploadsOwnersFolder, ownnerRoutes);
-
+app.use('/api/v1/driver', createUploadsDriverFolder,  driverRoutes);
+app.use('/api/v1/owner', createUploadsOwnersFolder, ownnerRoutes);
+app.use('/api/v1/make', makeRoutes);
+app.use('/api/v1/car', createUploadsCarsFolder, carRoutes);
 
 // Export app
 const port = process.env.PORT || 3000;

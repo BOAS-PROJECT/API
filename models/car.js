@@ -24,7 +24,6 @@ module.exports = (sequelize, DataTypes) => {
     seats: DataTypes.INTEGER,
     transmission: DataTypes.STRING,
     licensePlate: DataTypes.STRING,
-    priceDay: DataTypes.DOUBLE,
     isDriver: DataTypes.BOOLEAN,
     isActive: DataTypes.BOOLEAN
   }, {
