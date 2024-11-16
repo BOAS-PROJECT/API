@@ -180,6 +180,8 @@ const listWithDriver = async (req, res) => {
     seats: car.seats,
     transmission: car.transmission,
     licensePlate: car.licensePlate,
+    fuel: car.fuel,
+    description: car.description,
     averageRating: parseFloat(car.getDataValue("averageRating")),
   }));
 
@@ -236,6 +238,8 @@ const listWithoutDriver = async (req, res) => {
     seats: car.seats,
     transmission: car.transmission,
     licensePlate: car.licensePlate,
+    fuel: car.fuel,
+    description: car.description,
     averageRating: parseFloat(car.getDataValue("averageRating")),
   }));
 
