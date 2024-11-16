@@ -146,6 +146,7 @@ const listWithDriver = async (req, res) => {
       model: CarMake,
       attributes: ["name"],
     },
+    order: [["name", "DESC"]],
   });
 
   // Formatter la réponse
@@ -201,6 +202,7 @@ const listWithoutDriver = async (req, res) => {
       model: CarMake,
       attributes: ["name"],
     },
+    order: [["name", "DESC"]],
   });
 
   // Formatter la réponse
