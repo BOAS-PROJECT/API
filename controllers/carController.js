@@ -1,4 +1,5 @@
-const { Car, CarMake } = require("../models");
+const { Car, CarMake, Rating } = require("../models");
+const sequelize = require("sequelize");
 const { appendErrorLog } = require("../utils/logging");
 
 const create = async (req, res) => {
@@ -127,31 +128,45 @@ const create = async (req, res) => {
 const listWithDriver = async (req, res) => {
   try {
    const cars = await Car.findAll({
-     where: { isDriver: true },
-     attributes: { exclude: ["createdAt", "updatedAt", "priceWithoutDriver"] },
-     include: { model: CarMake, attributes: ["name"] },
-   });
-
-   const responseFormat = cars.map((car) => {
-    return {
-      id: car.id,
-      model: car.CarMake.name,
-      name: car.name,
-      image: car.image,
-      pride: car.priceWithDriver,
-      model: car.model,
-      year: car.year,
-      seats: car.seats,
-      transmission: car.transmission,
-      licensePlate: car.licensePlate,
-    };
+    where: { isDriver: true },
+    attributes: {
+      exclude: ["createdAt", "updatedAt", "priceWithoutDriver"],
+      include: [
+        [
+          sequelize.literal(
+            `(SELECT COALESCE(AVG(rating), 5) 
+              FROM "Ratings" 
+              WHERE "Ratings"."carId" = "Car"."id")`
+          ),
+          "averageRating",
+        ],
+      ],
+    },
+    include: {
+      model: CarMake,
+      attributes: ["name"],
+    },
   });
+
+  // Formatter la réponse
+  const responseFormat = cars.map((car) => ({
+    id: car.id,
+    model: car.CarMake.name,
+    name: car.name,
+    image: car.image,
+    price: car.priceWithDriver,
+    model: car.model,
+    year: car.year,
+    seats: car.seats,
+    transmission: car.transmission,
+    licensePlate: car.licensePlate,
+    averageRating: parseFloat(car.getDataValue("averageRating")),
+  }));
 
    return res.status(200).json({
      status: "success",
      data: responseFormat,
    });
-    
   } catch (error) {
     console.error(`ERROR LIST CAR WITH DRIVER: ${error}`);
     appendErrorLog(`ERROR LIST CAR WITH DRIVER: ${error}`);
@@ -165,26 +180,43 @@ const listWithDriver = async (req, res) => {
 
 const listWithoutDriver = async (req, res) => {
   try {
-   const cars = await Car.findAll({
-     where: { isDriver: true },
-     attributes: { exclude: ["createdAt", "updatedAt", "priceWithDriver"] },
-     include: { model: CarMake, attributes: ["name"] },
-   });
 
-   const responseFormat = cars.map((car) => {
-    return {
-      id: car.id,
-      model: car.CarMake.name,
-      name: car.name,
-      image: car.image,
-      pride: car.priceWithoutDriver,
-      model: car.model,
-      year: car.year,
-      seats: car.seats,
-      transmission: car.transmission,
-      licensePlate: car.licensePlate,
-    };
+   const cars = await Car.findAll({
+    where: { isDriver: true },
+    attributes: {
+      exclude: ["createdAt", "updatedAt", "priceWithDriver"],
+      include: [
+        // Calculer la moyenne des notations avec une sous-requête
+        [
+          sequelize.literal(
+            `(SELECT COALESCE(AVG(rating), 5) 
+              FROM "Ratings" 
+              WHERE "Ratings"."carId" = "Car"."id")`
+          ),
+          "averageRating",
+        ],
+      ],
+    },
+    include: {
+      model: CarMake,
+      attributes: ["name"],
+    },
   });
+
+  // Formatter la réponse
+  const responseFormat = cars.map((car) => ({
+    id: car.id,
+    model: car.CarMake.name,
+    name: car.name,
+    image: car.image,
+    price: car.priceWithoutDriver,
+    model: car.model,
+    year: car.year,
+    seats: car.seats,
+    transmission: car.transmission,
+    licensePlate: car.licensePlate,
+    averageRating: parseFloat(car.getDataValue("averageRating")),
+  }));
 
    return res.status(200).json({
      status: "success",
