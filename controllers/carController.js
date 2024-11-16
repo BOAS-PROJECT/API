@@ -124,4 +124,82 @@ const create = async (req, res) => {
   }
 };
 
-module.exports = { create };
+const listWithDriver = async (req, res) => {
+  try {
+   const cars = await Car.findAll({
+     where: { isDriver: true },
+     attributes: { exclude: ["createdAt", "updatedAt", "priceWithoutDriver"] },
+     include: { model: CarMake, attributes: ["name"] },
+   });
+
+   const responseFormat = cars.map((car) => {
+    return {
+      id: car.id,
+      model: car.CarMake.name,
+      name: car.name,
+      image: car.image,
+      pride: car.priceWithDriver,
+      model: car.model,
+      year: car.year,
+      seats: car.seats,
+      transmission: car.transmission,
+      licensePlate: car.licensePlate,
+    };
+  });
+
+   return res.status(200).json({
+     status: "success",
+     data: responseFormat,
+   });
+    
+  } catch (error) {
+    console.error(`ERROR LIST CAR WITH DRIVER: ${error}`);
+    appendErrorLog(`ERROR LIST CAR WITH DRIVER: ${error}`);
+    return res
+      .status(500)
+      .json({
+        error: "Une erreur s'est produite lors de la creation de la voiture.",
+      });
+  }
+};
+
+const listWithoutDriver = async (req, res) => {
+  try {
+   const cars = await Car.findAll({
+     where: { isDriver: true },
+     attributes: { exclude: ["createdAt", "updatedAt", "priceWithDriver"] },
+     include: { model: CarMake, attributes: ["name"] },
+   });
+
+   const responseFormat = cars.map((car) => {
+    return {
+      id: car.id,
+      model: car.CarMake.name,
+      name: car.name,
+      image: car.image,
+      pride: car.priceWithoutDriver,
+      model: car.model,
+      year: car.year,
+      seats: car.seats,
+      transmission: car.transmission,
+      licensePlate: car.licensePlate,
+    };
+  });
+
+   return res.status(200).json({
+     status: "success",
+     data: responseFormat,
+   });
+    
+  } catch (error) {
+    console.error(`ERROR LIST CAR WITH DRIVER: ${error}`);
+    appendErrorLog(`ERROR LIST CAR WITH DRIVER: ${error}`);
+    return res
+      .status(500)
+      .json({
+        error: "Une erreur s'est produite lors de la creation de la voiture.",
+      });
+  }
+};
+
+module.exports = { create,listWithDriver, listWithoutDriver };
