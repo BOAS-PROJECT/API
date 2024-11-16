@@ -6,12 +6,19 @@ dotenv.config();
 const morgan = require("morgan");
 const helmet = require("helmet");
 const fs = require("fs");
+const admin = require("firebase-admin");
+const serviceAccount = require("./utils/boasapp-4b0c1-firebase-adminsdk-jgcg2-5507559297.json");
 const userRoutes = require("./routes/userRoutes");
 const driverRoutes = require("./routes/driverRoutes");
 const ownnerRoutes = require("./routes/ownnerRoutes");
 
 // Init express app
 const app = express();
+
+// Firebase cloud messaging initialisation
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 // Middlewares
 app.use(cors());
@@ -61,7 +68,8 @@ app.use(
 );
 
 // Permissions policy
-/* app.use(
+/*
+app.use(
   permissionsPolicy({
     features: {
       payment: ["self", '"nyota-api.com"'],

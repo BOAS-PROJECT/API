@@ -2,8 +2,10 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const sharp = require("sharp");
 const path = require("path");
+const admin = require("firebase-admin");
 const { User } = require("../models");
 const { appendErrorLog } = require("../utils/logging");
+const { token } = require("morgan");
 
 const create = async (req, res) => {
   try {
@@ -293,4 +295,74 @@ const photo = async (req, res) => {
   }
 };
 
-module.exports = { create, login, photo };
+const updateToken = async (req, res) => {
+  try {
+    const tokenHeader = req.headers.authorization;
+    const { token } = req.body;
+    if (!tokenHeader) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token non fourni." });
+    }
+
+    // Vérifie si l'en-tête commence par "Bearer "
+    if (!tokenHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        status: "error",
+        message: "Format de token invalide.",
+      });
+    }
+
+    // Extrait le token en supprimant le préfixe "Bearer "
+    const customToken = tokenHeader.substring(7);
+    let decodedToken;
+
+    try {
+      decodedToken = jwt.verify(customToken, process.env.JWT_SECRET);
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .json({ status: "error", message: "TokenExpiredError" });
+      }
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token invalide." });
+    }
+
+    const userId = decodedToken.id;
+
+    const existingUser = await User.findByPk(userId);
+    if (!existingUser) {
+      return res.status(404).json({
+        status: "error",
+        message: "Ce compte n'existe pas.",
+      });
+    }
+
+    if (!token) {
+      return res.status(400).json({
+        status: "error",
+        message: "Veuillez fournir un token.",
+      });
+    }
+
+    await User.update({ token }, { where: { id: userId } });
+
+    return res.status(200).json({
+      status: "success",
+      message: "Token mis à jour avec succes.",
+    });
+
+    
+  } catch (error) {
+    console.error(`ERROR UPDATE TOKEN USER: ${error}`);
+    appendErrorLog(`ERROR UPDATE TOKEN USER: ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message: "Une erreur s'est produite lors de la mise à jour du token.",
+    });
+  }
+}
+
+module.exports = { create, login, photo, updateToken };
