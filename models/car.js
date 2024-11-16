@@ -24,10 +24,12 @@ module.exports = (sequelize, DataTypes) => {
     model: DataTypes.STRING,
     year: DataTypes.INTEGER,
     seats: DataTypes.INTEGER,
+    fuel: DataTypes.STRING,
     transmission: DataTypes.STRING,
     licensePlate: DataTypes.STRING,
     isDriver: DataTypes.BOOLEAN,
-    isActive: DataTypes.BOOLEAN
+    isActive: DataTypes.BOOLEAN,
+    description: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Car',

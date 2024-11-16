@@ -63,10 +63,18 @@ module.exports = {
         allowNull: false,
         defaultValue: false
       },
+      fuel: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
       isActive: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: true
+      },
+      description: {
+        type: Sequelize.STRING,
+        allowNull: false
       },
       createdAt: {
         allowNull: false,

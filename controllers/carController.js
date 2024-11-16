@@ -17,6 +17,8 @@ const create = async (req, res) => {
       transmission,
       licensePlate,
       isDriver,
+      description,
+      fuel,
     } = req.body;
 
     if (!makeId) {
@@ -75,6 +77,12 @@ const create = async (req, res) => {
         });
     }
 
+    if (!fuel) {
+      return res
+        .status(400)
+        .json({ error: "Le type de carburant de la voiture est obligatoire." });
+    }
+
     if (!isDriver) {
       return res
         .status(400)
@@ -82,6 +90,12 @@ const create = async (req, res) => {
           error:
             "Veuillez choisir si la voiture est avec chauffeur ou sans chauffeur.",
         });
+    }
+
+    if (!description) {
+      return res
+        .status(400)
+        .json({ error: "La description de la voiture est obligatoire." });
     }
 
     const carMake = await CarMake.findOne({ where: { id: makeId } });
@@ -111,9 +125,14 @@ const create = async (req, res) => {
       year,
       licensePlate,
       isDriver,
+      fuel,
+      description,
     });
 
-    return res.status(201).json({ message: "Voiture cree avec success." });
+    return res.status(201).json({ 
+      status: "success",
+      message : "Le véhicule a été cree avec succes."
+    });
   } catch (error) {
     console.error(`ERROR CREATE CAR: ${error}`);
     appendErrorLog(`ERROR CREATE CAR: ${error}`);
