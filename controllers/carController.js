@@ -8,7 +8,8 @@ const create = async (req, res) => {
     const {
       makeId,
       name,
-      price,
+      priceNormal,
+      priceDriver,
       model,
       year,
       seats,
@@ -29,10 +30,16 @@ const create = async (req, res) => {
         .json({ error: "Le nom de la véhicule est obligatoire." });
     }
 
-    if (!price) {
+    if (!priceNormal) {
       return res
         .status(400)
-        .json({ error: "Le montant de la voiture est obligatoire." });
+        .json({ error: "Le montant de la voiture sans chauffeurest obligatoire." });
+    }
+
+    if (!priceDriver) {
+      return res
+        .status(400)
+        .json({ error: "Le montant de la voiture avec chauffeur est obligatoire." });
     }
 
     if (!model) {
@@ -95,7 +102,8 @@ const create = async (req, res) => {
       makeId,
       name,
       image: imageUrl,
-      price,
+      priceWithoutDriver: priceNormal,
+      priceWithDriver: priceDriver,
       model,
       seats,
       transmission,

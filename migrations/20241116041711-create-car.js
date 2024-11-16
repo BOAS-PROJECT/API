@@ -27,7 +27,12 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      price: {
+      priceWithoutDriver: {
+        type: Sequelize.DOUBLE,
+        allowNull: false,
+        defaultValue: 0
+      },
+      priceWithDriver: {
         type: Sequelize.DOUBLE,
         allowNull: false,
         defaultValue: 0
