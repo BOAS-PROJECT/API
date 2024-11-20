@@ -14,6 +14,7 @@ const ownnerRoutes = require("./routes/ownnerRoutes");
 const makeRoutes = require("./routes/makeRoutes");
 const carRoutes = require("./routes/carRoutes");
 const carmovingRoutes = require("./routes/carmovingRoutes");
+const pharmacyRoutes = require("./routes/pharmacyRoutes");
 
 // Init express app
 const app = express();
@@ -98,6 +99,7 @@ app.use('/api/v1/owner', createUploadsOwnersFolder, ownnerRoutes);
 app.use('/api/v1/make', makeRoutes);
 app.use('/api/v1/car', createUploadsCarsFolder, carRoutes);
 app.use('/api/v1/carmoving', createUploadsCarsFolder, carmovingRoutes);
+app.use('/api/v1/pharmacy', pharmacyRoutes);
 
 // Export app
 const port = process.env.PORT || 3000;
