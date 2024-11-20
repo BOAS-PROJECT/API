@@ -20,6 +20,14 @@ const create = async (req, res) => {
       });
     }
 
+    const existingPharmacy = await Pharmacy.findOne({ where: { name } });
+    if (existingPharmacy) {
+      return res.status(400).json({
+        status: "error",
+        message: "Une pharmacie avec ce nom existe deja.",
+      });
+    }
+
     await Pharmacy.create({ name, address, cityId });
     return res.status(201).json({
       status: "success",
