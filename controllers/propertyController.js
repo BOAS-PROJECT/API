@@ -116,7 +116,7 @@ const create = async (req, res) => {
     const imagePath = `properties/${image.filename}`;
     const imageUrl = `${req.protocol}://${host}/${imagePath}`;
 
-    const existingProperty = await Property.findOne({ where: { title, city } });
+    const existingProperty = await Property.findOne({ where: { title, cityId: city, typeId: type } });
     if (existingProperty) {
       return res.status(400).json({
         status: "error",
