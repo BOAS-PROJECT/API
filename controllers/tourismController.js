@@ -87,12 +87,12 @@ const list = async (req, res) => {
             ]
         });
 
-        const responseFormat = images.map((image) => ({
-            id: image.id,
-            title: image.title,
-            description: image.description,
-            image: image.TourismImage.image,
-            images: image.TourismImage.map((image) => image.image),
+        const responseFormat = images.map((tourism) => ({
+            id: tourism.id,
+            title: tourism.title,
+            description: tourism.descriptions,
+            image: tourism.image,
+            
         }));
         
         return res.status(200).json({

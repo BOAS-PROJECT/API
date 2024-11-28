@@ -16,7 +16,7 @@ const carRoutes = require("./routes/carRoutes");
 const carmovingRoutes = require("./routes/carmovingRoutes");
 const pharmacyRoutes = require("./routes/pharmacyRoutes");
 const propertyRoutes = require("./routes/propertyRoutes");
-const tourismRoutes = require("./routes/tourismeRoutes");
+const tourismeRoutes = require("./routes/tourismRoutes");
 
 // Init express app
 const app = express();
@@ -122,7 +122,7 @@ app.use('/api/v1/car', createUploadsCarsFolder, carRoutes);
 app.use('/api/v1/carmoving', createUploadsCarsFolder, carmovingRoutes);
 app.use('/api/v1/pharmacy', pharmacyRoutes);
 app.use('/api/v1/property', createUploadsPropertiesFolder, propertyRoutes);
-app.use('/api/v1/tourism', createTourismPropertiesFolder, tourismRoutes);
+app.use('/api/v1/tourism', createTourismPropertiesFolder, tourismeRoutes);
 
 // Export app
 const port = process.env.PORT || 3000;
