@@ -2,22 +2,12 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Properties', {
+    await queryInterface.createTable('Tourisms', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
-      },
-      typeId: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'PropertyTypes',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
       },
       cityId: {
         type: Sequelize.INTEGER,
@@ -29,31 +19,12 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      ownerId:{
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'OwnerProperties',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
-      },
       title: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      description: {
+      descriptions: {
         type: Sequelize.TEXT,
-        allowNull: false
-      },
-      price: {
-        type: Sequelize.DOUBLE,
-        allowNull: false,
-        defaultValue: 0
-      },
-      surface: {
-        type: Sequelize.STRING,
         allowNull: false
       },
       image: {
@@ -72,6 +43,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Properties');
+    await queryInterface.dropTable('Tourisms');
   }
 };

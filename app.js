@@ -16,6 +16,7 @@ const carRoutes = require("./routes/carRoutes");
 const carmovingRoutes = require("./routes/carmovingRoutes");
 const pharmacyRoutes = require("./routes/pharmacyRoutes");
 const propertyRoutes = require("./routes/propertyRoutes");
+const tourismRoutes = require("./routes/tourismROutes");
 
 // Init express app
 const app = express();
@@ -72,6 +73,15 @@ const createUploadsPropertiesFolder = (req, res, next) => {
 };
 
 
+const createTourismPropertiesFolder = (req, res, next) => {
+  const folderPath = "public/tourisms";
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath, { recursive: true });
+  }
+  next();
+};
+
+
 // Public directory
 app.use(express.static("public"));
 
@@ -110,6 +120,7 @@ app.use('/api/v1/car', createUploadsCarsFolder, carRoutes);
 app.use('/api/v1/carmoving', createUploadsCarsFolder, carmovingRoutes);
 app.use('/api/v1/pharmacy', pharmacyRoutes);
 app.use('/api/v1/property', createUploadsPropertiesFolder, propertyRoutes);
+app.use('/api/v1/tourism', createTourismPropertiesFolder, tourismRoutes);
 
 // Export app
 const port = process.env.PORT || 3000;
