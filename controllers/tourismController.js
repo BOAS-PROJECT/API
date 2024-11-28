@@ -55,7 +55,7 @@ const create = async (req, res) => {
     const imageUrl = `${req.protocol}://${host}/${imagePath}`;
 
     await Tourism.create({
-      city,
+      cityId: city,
       title,
       description,
       image: imageUrl,
