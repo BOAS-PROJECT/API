@@ -16,7 +16,7 @@ const carRoutes = require("./routes/carRoutes");
 const carmovingRoutes = require("./routes/carmovingRoutes");
 const pharmacyRoutes = require("./routes/pharmacyRoutes");
 const propertyRoutes = require("./routes/propertyRoutes");
-const tourismeRoutes = require("./routes/tourismRoutes");
+const tourismeRoutes = require("./routes/tourismeRoutes");
 
 // Init express app
 const app = express();

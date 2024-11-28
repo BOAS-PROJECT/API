@@ -84,6 +84,10 @@ const list = async (req, res) => {
                     model: TourismImage,
                     attributes: ["image"],
                 },
+                {
+                    model: City,
+                    attributes: ["name"],
+                },
             ]
         });
 
@@ -92,7 +96,12 @@ const list = async (req, res) => {
             title: tourism.title,
             description: tourism.descriptions,
             image: tourism.image,
-            
+            city: tourism.City.name,
+            images: tourism.TourismImages.map((image) => {
+                return {
+                    image: image.image,
+                };
+            }),
         }));
         
         return res.status(200).json({
