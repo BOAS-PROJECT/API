@@ -1,6 +1,6 @@
 const express = require("express");
 const tourismController = require("../controllers/tourismController");
-const upload = require("../utils/propertyMulterConfig");
+const upload = require("../utils/tourismMulterConfig");
 const router = express.Router();
 
 // CREATION DU sites TOURISTIQUE
