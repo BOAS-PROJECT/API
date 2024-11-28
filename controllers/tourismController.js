@@ -57,7 +57,7 @@ const create = async (req, res) => {
     await Tourism.create({
       cityId: city,
       title,
-      description,
+      descriptions: description,
       image: imageUrl,
     });
 
