@@ -201,19 +201,19 @@ const reservation = async (req, res) => {
     const customerId = decodedToken.id;
     const customer = await User.findByPk(customerId);
     if (!customer) {
-        return res.status(400).json({ error: "Le client n'existe pas." });
+        return res.status(400).json({ status: "error", message: "Le client n'existe pas." });
     }
 
     const car = await CarMoving.findByPk(carId);
     if (!car) {
-      return res.status(400).json({ error: "La voiture n'existe pas." });
+      return res.status(400).json({ status: "error", message: "La voiture n'existe pas." });
     }
 
     const paymentMethod = await PaymentMethod.findByPk(payment);
     if (!paymentMethod) {
       return res
         .status(400)
-        .json({ error: "Le moyen de paiement n'existe pas." });
+        .json({ status: "error", message: "Le moyen de paiement n'existe pas." });
     }
 
     const imagePath = `attachments/${image.filename}`;
