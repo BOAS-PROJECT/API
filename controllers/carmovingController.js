@@ -222,7 +222,7 @@ const reservation = async (req, res) => {
 
     await Reservation.create({
       userId: customer.id,
-      carMovingId: carId,
+      carId: carId,
       paymentMethodId: payment,
       days,
       date,
