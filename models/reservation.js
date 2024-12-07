@@ -34,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
     status: DataTypes.INTEGER,
     amount: DataTypes.DOUBLE,
     days: DataTypes.INTEGER,
-    date: DataTypes.DATE
+    date: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Reservation',

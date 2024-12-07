@@ -109,7 +109,7 @@ module.exports = {
         defaultValue: 1
       },
       date: {
-        type: Sequelize.DATE,
+        type: Sequelize.STRING,
         allowNull: true
       },
       createdAt: {
