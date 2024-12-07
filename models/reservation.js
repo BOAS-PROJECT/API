@@ -13,17 +13,25 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       this.belongsTo(models.User, { foreignKey: 'userId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.belongsTo(models.Car, { foreignKey: 'carId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      this.belongsTo(models.Driver, { foreignKey: 'driverId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      this.belongsTo(models.CarMoving, { foreignKey: 'carMovingId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      this.belongsTo(models.Pharmacy, { foreignKey: 'pharmacyId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      this.belongsTo(models.Tourism, { foreignKey: 'tourismId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      this.belongsTo(models.PaymentMethod, { foreignKey: 'paymentMethodId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
     }
   }
   Reservation.init({
     userId: DataTypes.INTEGER,
     carId: DataTypes.INTEGER,
+    driverId: DataTypes.INTEGER,
+    carMovingId: DataTypes.INTEGER,
+    pharmacyId: DataTypes.INTEGER,
+    tourismId: DataTypes.INTEGER,
     paymentMethodId: DataTypes.INTEGER,
-    day: DataTypes.STRING,
-    amount: DataTypes.DOUBLE,
-    date: DataTypes.STRING,
     attachment: DataTypes.STRING,
-    status: DataTypes.STRING
+    status: DataTypes.INTEGER,
+    amount: DataTypes.DOUBLE,
+    date: DataTypes.DOUBLE
   }, {
     sequelize,
     modelName: 'Reservation',

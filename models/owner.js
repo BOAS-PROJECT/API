@@ -11,6 +11,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      this.hasMany(models.Property, { foreignKey: 'ownerId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      this.hasMany(models.OwnerProperty, { foreignKey: 'ownerId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      this.hasMany(models.Driver, { foreignKey: 'ownerId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
     }
   }
   Owner.init({

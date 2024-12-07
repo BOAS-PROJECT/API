@@ -21,9 +21,49 @@ module.exports = {
       },
       carId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'Cars',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      },
+      driverId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'Drivers',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      },
+      carMovingId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'CarMovings',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      },
+      pharmacyId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'Pharmacies',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      },
+      tourismId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'Tourisms',
           key: 'id'
         },
         onUpdate: 'CASCADE',
@@ -40,20 +80,6 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      day: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        defaultValue: 1
-      },
-      amount: {
-        type: Sequelize.DOUBLE,
-        allowNull: false,
-        defaultValue: 0
-      },
-      date: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
       attachment: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -61,6 +87,15 @@ module.exports = {
       status: {
         type: Sequelize.INTEGER,
         allowNull: false
+      },
+      amount: {
+        type: Sequelize.DOUBLE,
+        allowNull: false,
+        defaultValue: 0
+      },
+      date: {
+        type: Sequelize.DOUBLE,
+        allowNull: true
       },
       createdAt: {
         allowNull: false,
