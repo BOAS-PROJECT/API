@@ -137,9 +137,7 @@ const list = async (req, res) => {
 const reservation = async (req, res) => {
   try {
     const token = req.headers.authorization;
-    const { carId, payment, days, date, amount, description } = req.body;
-    const host = req.get("host");
-    const image = req.file;
+    const { carId, days, date, amount, description } = req.body;
 
     if (!token) {
       return res
@@ -161,19 +159,10 @@ const reservation = async (req, res) => {
         .status(400)
         .json({ status: "error", message: "Le montant est obligatoire." });
     }
-    if (!image) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "Une piece jointe est obligatoire." });
-    }
-    if (!payment) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "Le paiement est obligatoire." });
-    }
     if (!carId) {
       return res
-        .json({ status: "error", message: "ID de la voiture est obligatoire." });
+        .status(400)
+        .json({ status: "error", message: "L'ID de la véhicule est obligatoire." });
     }
 
     if (!description) {
@@ -219,36 +208,25 @@ const reservation = async (req, res) => {
         return res.status(400).json({ status: "error", message: "Le client n'existe pas." });
     }
 
-    const car = await Car.findByPk(carId);
+    const car = await CarMoving.findByPk(carId);
     if (!car) {
-      return res.status(400).json({ status: "error", message: "La voiture n'existe pas." });
+      return res.status(400).json({ status: "error", message: "Le véhicule n'existe pas." });
     }
-
-    const paymentMethod = await PaymentMethod.findByPk(payment);
-    if (!paymentMethod) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "Le moyen de paiement n'existe pas." });
-    }
-
-    const imagePath = `attachments/${image.filename}`;
-    const imageUrl = `${req.protocol}://${host}/${imagePath}`;
 
     await Reservation.create({
       userId: customer.id,
-      carId: carId,
-      paymentMethodId: payment,
+      carMovingId: carId,
+      paymentMethodId: 1,
       days,
       date,
       amount,
       status: 1,
       description,
-      attachment: imageUrl,
     });
 
     return res.status(201).json({
       status: "success",
-      message: "Votre réservation de véhicule a été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !",
+      message: "Votre réservation de véhicule de déménagement a été prise en compte avec succès. Vous serrez contacté sous peu, merci.",
     });
   } catch (error) {
     console.error(`ERROR RESERVATION CARMOVING: ${error}`);
