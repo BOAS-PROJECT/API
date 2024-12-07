@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.City, { foreignKey: 'cityId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.belongsTo(models.PropertyType, { foreignKey: 'typeId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.hasMany(models.PropertyImage, { foreignKey: 'propertyId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      this.hasMany(models.Reservation, { foreignKey: 'propertyId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
     }
   }
   Property.init({

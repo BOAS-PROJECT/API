@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.Tourism, { foreignKey: 'tourismId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.belongsTo(models.PaymentMethod, { foreignKey: 'paymentMethodId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.belongsTo(models.Leisure, { foreignKey: 'leisureId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      this.belongsTo(models.Property, { foreignKey: 'propertyId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
     }
   }
   Reservation.init({
@@ -27,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     driverId: DataTypes.INTEGER,
     carMovingId: DataTypes.INTEGER,
     pharmacyId: DataTypes.INTEGER,
+    propertyId: DataTypes.INTEGER,
     tourismId: DataTypes.INTEGER,
     leisureId: DataTypes.INTEGER,
     paymentMethodId: DataTypes.INTEGER,

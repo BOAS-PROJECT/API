@@ -15,4 +15,7 @@ router.post("/create-owner", propertyController.createOwner);
 // LISTE DES BIENS
 router.get("/list", propertyController.list);
 
+// RESERVATION DU BIEN
+router.post("/reservation", propertyController.reservation);
+
 module.exports = router;

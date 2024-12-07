@@ -1,4 +1,4 @@
-const { Property, PropertyType, PropertyImage, City, OwnerProperty } = require("../models");
+const { Property, PropertyType, PropertyImage, City, OwnerProperty, User, Car, PaymentMethod, Reservation } = require("../models");
 const { appendErrorLog } = require("../utils/logging");
 
 const createtype = async (req, res) => {
@@ -232,9 +232,140 @@ const list = async (req, res) => {
   }
 };
 
+const reservation = async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+    const { carId, propertyId, payment, days, date, amount, description } = req.body;
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token non fourni." });
+    }
+    if (!days) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Le nombre de jours est obligatoire." });
+    }
+    if (!date) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "La date est obligatoire." });
+    }
+    if (!amount) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Le montant est obligatoire." });
+    }
+
+    if (!payment) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Le paiement est obligatoire." });
+    }
+    if (!carId) {
+      return res
+        .json({ status: "error", message: "ID de la voiture est obligatoire." });
+    }
+
+    if (!propertyId) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "ID de la propriete est obligatoire." });
+    }
+
+    if (!description) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "La description est obligatoire." });
+    }
+
+    // Vérifie si l'en-tête commence par "Bearer "
+    if (!token.startsWith("Bearer ")) {
+      return res.status(401).json({
+        status: "error",
+        message: "Format de token invalide.",
+      });
+    }
+
+    // Extrait le token en supprimant le préfixe "Bearer "
+    const customToken = token.substring(7);
+    let decodedToken;
+
+    try {
+      decodedToken = jwt.verify(customToken, process.env.JWT_SECRET);
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .json({ status: "error", message: "TokenExpiredError" });
+      }
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token invalide." });
+    }
+
+    if (!decodedToken) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token invalide." });
+    }
+
+    const customerId = decodedToken.id;
+    const customer = await User.findByPk(customerId);
+    if (!customer) {
+        return res.status(400).json({ status: "error", message: "Le client n'existe pas." });
+    }
+
+    const car = await Car.findByPk(carId);
+    if (!car) {
+      return res.status(400).json({ status: "error", message: "La voiture n'existe pas." });
+    }
+
+    const property = await Property.findByPk(propertyId);
+    if (!property) {
+      return res.status(400).json({ status: "error", message: "Le logement n'existe pas." });
+    }
+
+    const paymentMethod = await PaymentMethod.findByPk(payment);
+    if (!paymentMethod) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Le moyen de paiement n'existe pas." });
+    }
+
+
+    await Reservation.create({
+      userId: customer.id,
+      carId: carId,
+      propertyId: propertyId,
+      paymentMethodId: payment,
+      days,
+      date,
+      amount,
+      status: 1,
+      description
+    });
+
+    return res.status(201).json({
+      status: "success",
+      message: "Votre réservation de véhicule vers votre logement a bien été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !",
+    });
+  } catch (error) {
+    console.error(`ERROR RESERVATION CARMOVING: ${error}`);
+    appendErrorLog(`ERROR RESERVATION CARMOVING: ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message: "Une erreur s'est produite lors de la creation du compte.",
+    });
+  }
+};
+
+
 module.exports = {
   createtype,
   create,
   createOwner,
   list,
+  reservation
 };
