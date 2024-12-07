@@ -129,7 +129,7 @@ const list = async (req, res) => {
 const reservation = async (req, res) => {
   try {
     const token = req.headers.authorization;
-    const { carId, payment, days, date, amount } = req.body;
+    const { carId, payment, days, date, amount, description } = req.body;
     const host = req.get("host");
     const image = req.file;
 
@@ -166,6 +166,12 @@ const reservation = async (req, res) => {
     if (!carId) {
       return res
         .json({ status: "error", message: "ID de la voiture est obligatoire." });
+    }
+
+    if (!description) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "La description est obligatoire." });
     }
 
     // Vérifie si l'en-tête commence par "Bearer "
@@ -227,6 +233,8 @@ const reservation = async (req, res) => {
       days,
       date,
       amount,
+      status: 1,
+      description,
       attachment: imageUrl,
     });
 

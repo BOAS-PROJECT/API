@@ -32,6 +32,7 @@ module.exports = (sequelize, DataTypes) => {
     paymentMethodId: DataTypes.INTEGER,
     attachment: DataTypes.STRING,
     status: DataTypes.INTEGER,
+    description: DataTypes.TEXT,
     amount: DataTypes.DOUBLE,
     days: DataTypes.INTEGER,
     date: DataTypes.STRING
