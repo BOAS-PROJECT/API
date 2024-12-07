@@ -42,6 +42,11 @@ module.exports = {
         allowNull: false,
         defaultValue: 0
       },
+      priceHandling: {
+        type: Sequelize.DOUBLE,
+        allowNull: false,
+        defaultValue: 0
+      },
       licensePlate: {
         type: Sequelize.STRING,
         allowNull: false

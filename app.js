@@ -126,7 +126,7 @@ app.use("/api/v1/user", createUploadsUsersFolder, userRoutes);
 app.use('/api/v1/driver', createUploadsDriverFolder,  driverRoutes);
 app.use('/api/v1/owner', createUploadsOwnersFolder, ownnerRoutes);
 app.use('/api/v1/make', makeRoutes);
-app.use('/api/v1/car', createUploadsCarsFolder, carRoutes);
+app.use('/api/v1/car', createUploadsCarsFolder, createAttachmentsFolder, carRoutes);
 app.use('/api/v1/carmoving', createUploadsCarsFolder, createAttachmentsFolder, carmovingRoutes);
 app.use('/api/v1/pharmacy', pharmacyRoutes);
 app.use('/api/v1/property', createUploadsPropertiesFolder, propertyRoutes);

@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     volume: DataTypes.DOUBLE,
     tonage: DataTypes.DOUBLE,
     price: DataTypes.DOUBLE,
+    priceHandling: DataTypes.DOUBLE,
     licensePlate: DataTypes.STRING,
     isActive: DataTypes.BOOLEAN
   }, {

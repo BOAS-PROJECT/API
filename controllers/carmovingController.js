@@ -14,41 +14,47 @@ const create = async (req, res) => {
   try {
     const host = req.get("host");
     const image = req.file;
-    const { makeId, name, volume, tonage, price, licensePlate } = req.body;
+    const { makeId, name, volume, tonage, price, priceHandling, licensePlate } = req.body;
 
     if (!makeId) {
       return res
         .status(400)
-        .json({ error: "ID de la marque est obligatoire." });
+        .json({ status: "error", message: "ID de la marque est obligatoire." });
     }
 
     if (!name) {
       return res
         .status(400)
-        .json({ error: "Le nom de la voiture est obligatoire." });
+        .json({ status: "error", message:  "Le nom de la voiture est obligatoire." });
     }
 
     if (!volume) {
       return res
         .status(400)
-        .json({ error: "Le volume de la voiture est obligatoire." });
+        .json({ status: "error", message:  "Le volume de la voiture est obligatoire." });
     }
 
     if (!tonage) {
       return res
         .status(400)
-        .json({ error: "Le tonnage de la voiture est obligatoire." });
+        .json({ status: "error", message:  "Le tonnage de la voiture est obligatoire." });
     }
 
     if (!price) {
       return res
         .status(400)
-        .json({ error: "Le prix de la voiture est obligatoire." });
+        .json({ status: "error", message:  "Le prix de la voiture est obligatoire." });
     }
 
     if (!licensePlate) {
+      return res
+        .status(400)
+        .json({ status: "error", message:  "Le plaque d'immatriculation de la voiture est obligatoire." });
+    }
+
+    if(!priceHandling){
       return res.status(400).json({
-        error: "Le plaque d'immatriculation de la voiture est obligatoire.",
+       status: "error", message: "Le prix de la voiture est obligatoire.",
       });
     }
 
@@ -56,12 +62,12 @@ const create = async (req, res) => {
     if (!carMake) {
       return res
         .status(400)
-        .json({ error: "La marque de la voiture n'existe pas." });
+        .json({ status: "error", message:  "La marque de la voiture n'existe pas." });
     }
 
     const existingCar = await CarMoving.findOne({ where: { name } });
     if (existingCar) {
-      return res.status(400).json({ error: "La voiture existe deja." });
+      return res.status(400).json({ status: "error", message:  "La voiture existe deja." });
     }
 
     const imagePath = `cars/${image.filename}`;
@@ -74,6 +80,7 @@ const create = async (req, res) => {
       volume,
       tonage,
       price,
+      priceHandling,
       licensePlate,
     });
 
@@ -109,6 +116,7 @@ const list = async (req, res) => {
       volume: car.volume,
       tonage: car.tonage,
       price: car.price,
+      priceHandling: car.priceHandling,
       licensePlate: car.licensePlate,
     }));
 
