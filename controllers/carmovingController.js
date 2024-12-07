@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const {
+  Car,
   CarMoving,
   CarMake,
   Reservation,
@@ -204,7 +205,7 @@ const reservation = async (req, res) => {
         return res.status(400).json({ status: "error", message: "Le client n'existe pas." });
     }
 
-    const car = await CarMoving.findByPk(carId);
+    const car = await Car.findByPk(carId);
     if (!car) {
       return res.status(400).json({ status: "error", message: "La voiture n'existe pas." });
     }
@@ -231,7 +232,7 @@ const reservation = async (req, res) => {
 
     return res.status(201).json({
       status: "success",
-      message: "La reservation a bien ete cree avec succes.",
+      message: "Votre réservation de véhicule a été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !",
     });
   } catch (error) {
     console.error(`ERROR RESERVATION CARMOVING: ${error}`);
