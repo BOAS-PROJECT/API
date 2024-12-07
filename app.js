@@ -81,6 +81,14 @@ const createTourismPropertiesFolder = (req, res, next) => {
   next();
 };
 
+const createAttachmentsFolder = (req, res, next) => {
+  const folderPath = "public/attachments";
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath, { recursive: true });
+  }
+  next();
+};
+
 
 // Public directory
 app.use(express.static("public"));
@@ -119,7 +127,7 @@ app.use('/api/v1/driver', createUploadsDriverFolder,  driverRoutes);
 app.use('/api/v1/owner', createUploadsOwnersFolder, ownnerRoutes);
 app.use('/api/v1/make', makeRoutes);
 app.use('/api/v1/car', createUploadsCarsFolder, carRoutes);
-app.use('/api/v1/carmoving', createUploadsCarsFolder, carmovingRoutes);
+app.use('/api/v1/carmoving', createUploadsCarsFolder, createAttachmentsFolder, carmovingRoutes);
 app.use('/api/v1/pharmacy', pharmacyRoutes);
 app.use('/api/v1/property', createUploadsPropertiesFolder, propertyRoutes);
 app.use('/api/v1/tourism', createTourismPropertiesFolder, tourismeRoutes);
