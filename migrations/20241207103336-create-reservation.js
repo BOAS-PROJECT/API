@@ -96,7 +96,8 @@ module.exports = {
       },
       status: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
       },
       amount: {
         type: Sequelize.DOUBLE,
