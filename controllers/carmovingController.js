@@ -1,4 +1,4 @@
-const {  CarMoving, CarMake } = require("../models");
+const {  CarMoving, CarMake, Reservation, Customer } = require("../models");
 const { appendErrorLog } = require("../utils/logging");
 
 const create = async (req, res) => {
@@ -122,9 +122,79 @@ const list = async (req, res) => {
 
 const reservation = async (req, res) => {
     try {
-        const { customerId, days, date, amount } = req.body;
+        const { customerId, carId, payment, days, date, amount } = req.body;
         const host = req.get("host");
-        
+        const image = req.file;
+        if (!customerId) {
+            return res
+                .status(400)
+                .json({ error: "ID du client est obligatoire." });
+        }
+        if (!days) {
+            return res
+                .status(400)
+                .json({ error: "Le nombre de jours est obligatoire." });
+        }
+        if (!date) {
+            return res
+                .status(400)
+                .json({ error: "La date est obligatoire." });
+        }
+        if (!amount) {
+            return res
+                .status(400)
+                .json({ error: "Le montant est obligatoire." });
+        }
+
+        if (!image) {
+            return res
+                .status(400)
+                .json({ error: "Une piece jointe est obligatoire." });
+        }
+
+        if (!payment) {
+            return res
+                .status(400)
+                .json({ error: "Le paiement est obligatoire." });
+        }
+
+        if (!carId) {
+            return res
+                .status(400)
+                .json({ error: "ID de la voiture est obligatoire." });
+        }
+
+        const customer = await Customer.findByPk(customerId);
+        if (!customer) {
+            return res
+                .status(400)
+                .json({ error: "Le client n'existe pas." });
+        }
+
+        const car = await CarMoving.findByPk(carId);
+        if (!car) {
+            return res
+                .status(400)
+                .json({ error: "La voiture n'existe pas." });
+        }
+
+        const imagePath = `attachments/${image.filename}`;
+        const imageUrl = `${req.protocol}://${host}/${imagePath}`;
+
+        await Reservation.create({
+            userId:customerId,
+            carMovingId: carId,
+            paymentMethodId: payment,
+            days,
+            date,
+            amount,
+            attachment: imageUrl,
+        });
+
+        return res.status(201).json({
+            status: "success",
+            message: "La reservation a bien ete cree avec succes.",
+        });
     } catch (error) {
         console.error(`ERROR RESERVATION CARMOVING: ${error}`);
         appendErrorLog(`ERROR RESERVATION CARMOVING: ${error}`);
@@ -135,4 +205,4 @@ const reservation = async (req, res) => {
     }
 }
 
-module.exports =  { create, list };
+module.exports =  { create, list, reservation };
