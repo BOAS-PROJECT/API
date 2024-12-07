@@ -29,16 +29,6 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      ownerId:{
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'OwnerProperties',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
-      },
       title: {
         type: Sequelize.STRING,
         allowNull: false
