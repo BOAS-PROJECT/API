@@ -69,6 +69,16 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
+      leisureId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'Leisure',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      },
       paymentMethodId: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -93,8 +103,13 @@ module.exports = {
         allowNull: false,
         defaultValue: 0
       },
+      days: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 1
+      },
       date: {
-        type: Sequelize.DOUBLE,
+        type: Sequelize.DATE,
         allowNull: true
       },
       createdAt: {

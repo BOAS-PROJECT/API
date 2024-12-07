@@ -119,4 +119,20 @@ const list = async (req, res) => {
     }
 }
 
+
+const reservation = async (req, res) => {
+    try {
+        const { customerId, days, date, amount } = req.body;
+        const host = req.get("host");
+        
+    } catch (error) {
+        console.error(`ERROR RESERVATION CARMOVING: ${error}`);
+        appendErrorLog(`ERROR RESERVATION CARMOVING: ${error}`);
+        return res.status(500).json({
+            status: "error",
+            message: "Une erreur s'est produite lors de la creation du compte.",
+        });
+    }
+}
+
 module.exports =  { create, list };
