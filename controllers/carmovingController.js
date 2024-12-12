@@ -14,7 +14,7 @@ const create = async (req, res) => {
   try {
     const host = req.get("host");
     const image = req.file;
-    const { makeId, name, volume, tonage, price, priceHandling, licensePlate } = req.body;
+    const { makeId, name, volume, tonage, price, priceHandling, licensePlate, description } = req.body;
 
     if (!makeId) {
       return res
@@ -58,6 +58,12 @@ const create = async (req, res) => {
       });
     }
 
+    if (!description) {
+      return res
+        .status(400)
+        .json({ status: "error", message:  "La description de la voiture est obligatoire." });
+    }
+
     const carMake = await CarMake.findByPk(makeId);
     if (!carMake) {
       return res
@@ -82,6 +88,7 @@ const create = async (req, res) => {
       price,
       priceHandling,
       licensePlate,
+      description
     });
 
     return res.status(201).json({
@@ -118,6 +125,7 @@ const list = async (req, res) => {
       price: car.price,
       priceHandling: car.priceHandling,
       licensePlate: car.licensePlate,
+      description: car.description
     }));
 
     return res.status(200).json({
