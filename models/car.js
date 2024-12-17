@@ -30,7 +30,8 @@ module.exports = (sequelize, DataTypes) => {
     licensePlate: DataTypes.STRING,
     isDriver: DataTypes.BOOLEAN,
     isActive: DataTypes.BOOLEAN,
-    description: DataTypes.STRING
+    description: DataTypes.STRING,
+    information: DataTypes.TEXT
   }, {
     sequelize,
     modelName: 'Car',

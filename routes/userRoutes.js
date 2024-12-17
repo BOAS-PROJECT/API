@@ -12,4 +12,7 @@ router.post("/login", userController.login);
 // PHOTO DE PROFIL
 router.put("/photo", upload.single("photo"), userController.photo);
 
+// TOKEN
+router.put("/update-token", userController.updateToken);
+
 module.exports = router;

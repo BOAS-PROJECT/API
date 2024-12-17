@@ -76,6 +76,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
+      information: {
+        type: Sequelize.TEXT,
+        allowNull: false
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
