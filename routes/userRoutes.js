@@ -15,4 +15,7 @@ router.put("/photo", upload.single("photo"), userController.photo);
 // TOKEN
 router.put("/update-token", userController.updateToken);
 
+// MISE À JOURS DU MOT DE PASSE
+router.put("/update-password", userController.updatePassword);
+
 module.exports = router;

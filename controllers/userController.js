@@ -365,4 +365,97 @@ const updateToken = async (req, res) => {
   }
 }
 
-module.exports = { create, login, photo, updateToken };
+
+const updatePassword = async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+    const { oldPassword, newPassword } = req.body;
+
+    // Récupérer le worker et vérifier s'il existe
+    if (!token) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token non fourni." });
+    }
+
+    // Vérifie si l'en-tête commence par "Bearer "
+    if (!token.startsWith("Bearer ")) {
+      return res.status(401).json({
+        status: "error",
+        message: "Format de token invalide.",
+      });
+    }
+
+    // Extrait le token en supprimant le préfixe "Bearer "
+    const customToken = token.substring(7);
+    let decodedToken;
+
+    try {
+      decodedToken = jwt.verify(customToken, process.env.JWT_SECRET);
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .json({ status: "error", message: "TokenExpiredError" });
+      }
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token invalide." });
+    }
+
+    const customerId = decodedToken.id;
+
+    const customer = await User.findByPk(customerId);
+    if (!customer) {
+      return res.status(404).json({
+        status: "error",
+        message:
+          "Compte non trouvé. Veuillez réessayer ou en créer un nouveau.",
+      });
+    }
+
+    if (!oldPassword) {
+      return res.status(400).json({
+        status: "error",
+        message: "Le mot de passe actuel est requis.",
+      });
+    }
+
+    if (!newPassword) {
+      return res.status(400).json({
+        status: "error",
+        message: "Le nouveau mot de passe est requis.",
+      });
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      oldPassword,
+      customer.password
+    );
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        status: "error",
+        message:
+          "Mot de passe invalide ou ne corresponde pas. Veuillez réessayer.",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await customer.update({ password: hashedPassword });
+    return res.status(200).json({
+      status: "success",
+      message: "Votre mot de passe à été mis à jour avec succes.",
+    });
+  } catch (error) {
+    console.error(`ERROR UPDATE PASSWORD CUSTOMER: ${error}`);
+    appendErrorLog(`ERROR UPDATE PASSWORD CUSTOMER: ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message:
+        "Une erreur s'est produite lors de la mise à jour du mot de passe.",
+    });
+  }
+};
+
+module.exports = { create, login, photo, updateToken, updatePassword };
