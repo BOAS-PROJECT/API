@@ -18,4 +18,7 @@ router.put("/update-token", userController.updateToken);
 // MISE À JOURS DU MOT DE PASSE
 router.put("/update-password", userController.updatePassword);
 
+// LISTE DES RESERVATIONS
+router.get("/reservation-list", userController.reservationlist);
+
 module.exports = router;

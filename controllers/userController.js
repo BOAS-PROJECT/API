@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const sharp = require("sharp");
 const path = require("path");
 const admin = require("firebase-admin");
-const { User } = require("../models");
+const { User, Reservation, Car, Driver, Pharmacy, Tourism, Leisure, CarMoving } = require("../models");
 const { appendErrorLog } = require("../utils/logging");
 const { token } = require("morgan");
 
@@ -365,7 +365,6 @@ const updateToken = async (req, res) => {
   }
 }
 
-
 const updatePassword = async (req, res) => {
   try {
     const token = req.headers.authorization;
@@ -458,4 +457,128 @@ const updatePassword = async (req, res) => {
   }
 };
 
-module.exports = { create, login, photo, updateToken, updatePassword };
+const reservationlist = async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token non fourni." });
+    }
+
+    // Vérifie si l'en-tête commence par "Bearer "
+    if (!token.startsWith("Bearer ")) {
+      return res.status(401).json({
+        status: "error",
+        message: "Format de token invalide.",
+      });
+    }
+
+    // Extrait le token en supprimant le préfixe "Bearer "
+    const customToken = token.substring(7);
+    let decodedToken;
+
+    try {
+      decodedToken = jwt.verify(customToken, process.env.JWT_SECRET);
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .json({ status: "error", message: "Votre session a expiré." });
+      }
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token invalide." });
+    }
+
+    const userId = decodedToken.id;
+
+    const user = await User.findByPk(userId, {
+      include: [
+        {
+          model: Reservation,
+          attributes: [
+            "id",
+            "status",
+            "amount",
+            "date",
+            "description",
+          ],
+          include: [
+            { model: Car, attributes: ["name", "image", "priceWithoutDriver", "priceWithDriver", "licensePlate"], required: false },
+            { model: Driver, attributes: ["firstName", "lastName", "maritalStatus", "numberPlate", "phone", "photo"], required: false },
+            { model: Pharmacy, attributes: ["name", "address"], required: false },
+            { model: Tourism, attributes: ["title", "descriptions", "image"], required: false },
+            { model: Leisure, attributes: ["title", "description"], required: false },
+            { model: CarMoving, attributes: ["name", "image", "price", "licensePlate"], required: false },
+          ],
+        },
+      ],
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message:
+          "Compte non trouvé. Veuillez réessayer ou en créer un nouveau.",
+      });
+    }
+
+    const formattedReservations = user.Reservations.map((reservation) => {
+      let type = null;
+
+      if (reservation.Car) {
+        if (reservation.carId && reservation.driverId) {
+          type = "Réservation de Taxi (véhicule avec chauffeur)";
+        } else if (reservation.carId && !reservation.driverId) {
+          type = "Réservation de Véhicule sans chauffeur";
+        } else {
+          type = "Réservation de Taxi";
+        }
+      } else if (reservation.Driver) {
+        type = "Réservation de Chauffeur";
+      } else if (reservation.Pharmacy) {
+        type = "Réservation de Pharmacie";
+      } else if (reservation.Tourism) {
+        type = "Réservation de Tourisme";
+      } else if (reservation.Leisure) {
+        type = "Réservation de Loisirs";
+      } else if (reservation.CarMoving) {
+        type = "Réservation véhicule de déménagement";
+      }
+
+      const formattedDate = new Date(reservation.date).toLocaleString("fr-FR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      return {
+        type,
+        date: formattedDate,
+        amount: reservation.amount,
+        description: reservation.description,
+        status: reservation.status === 0 ? "Pending" : "Confirmed",
+      };
+    });
+
+    
+
+    return res.status(200).json({
+      status: "success",
+      data: formattedReservations,
+    });
+  } catch (error) {
+    console.error(`ERROR LIST RESERVATION: ${error}`);
+    appendErrorLog(`ERROR LIST RESERVATION: ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message: "Une erreur s'est produite lors de la récupération des réservations.",
+    });
+  }
+};
+
+module.exports = { create, login, photo, updateToken, updatePassword, reservationlist };
