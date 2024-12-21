@@ -32,8 +32,7 @@ module.exports = (sequelize, DataTypes) => {
     isDriver: DataTypes.BOOLEAN,
     isActive: DataTypes.BOOLEAN,
     descriptionWithDriver: DataTypes.TEXT,
-    descriptionWithoutDriver: DataTypes.TEXT,
-    information: DataTypes.TEXT
+    descriptionWithoutDriver: DataTypes.TEXT
   }, {
     sequelize,
     modelName: 'Car',

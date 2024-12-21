@@ -184,7 +184,8 @@ const listWithDriver = async (req, res) => {
     transmission: car.transmission,
     licensePlate: car.licensePlate,
     fuel: car.fuel,
-    description: car.description,
+    descriptionWithoutDriver: car.descriptionWithoutDriver,
+    descriptionWithDriver: car.descriptionWithDriver,
     averageRating: parseFloat(car.getDataValue("averageRating")),
   }));
 
