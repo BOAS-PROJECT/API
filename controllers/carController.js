@@ -20,6 +20,7 @@ const create = async (req, res) => {
       descriptionWithDriver,
       descriptionWithoutDriver,
       fuel,
+      caution,
     } = req.body;
 
     if (!makeId) {
@@ -93,6 +94,12 @@ const create = async (req, res) => {
         });
     }
 
+    if (!caution) {
+      return res
+        .status(400)
+        .json({ error: "La caution de la voiture est obligatoire." });
+    }
+
     // Que descriptionWithDriver ou descriptionWithoutDriver soit renseigné
     if (!descriptionWithDriver && !descriptionWithoutDriver) {
       return res
@@ -128,6 +135,7 @@ const create = async (req, res) => {
       licensePlate,
       isDriver,
       fuel,
+      caution,
       descriptionWithDriver,
       descriptionWithoutDriver
     });
