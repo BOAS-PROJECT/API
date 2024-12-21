@@ -67,18 +67,22 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
+      caution: {
+        type: Sequelize.DOUBLE,
+        allowNull: false
+      },
       isActive: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: true
       },
-      description: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      information: {
+      descriptionWithDriver: {
         type: Sequelize.TEXT,
-        allowNull: false
+        allowNull: true
+      },
+      descriptionWithoutDriver: {
+        type: Sequelize.TEXT,
+        allowNull: true
       },
       createdAt: {
         allowNull: false,

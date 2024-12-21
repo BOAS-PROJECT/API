@@ -21,4 +21,6 @@ router.put("/update-password", userController.updatePassword);
 // LISTE DES RESERVATIONS
 router.get("/reservation-list", userController.reservationlist);
 
+router.post("/notification", userController.notification);
+
 module.exports = router;

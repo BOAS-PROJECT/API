@@ -581,4 +581,33 @@ const reservationlist = async (req, res) => {
   }
 };
 
-module.exports = { create, login, photo, updateToken, updatePassword, reservationlist };
+const notification = async (req, res) => {
+  try {
+   // const customers = await User.findAll();
+
+  const message = {
+    token:'dK5IN3wOQ_S-I_X5KKvZ1v:APA91bGh7Bao8pR6WVffXSpB6kMsVn4p1pwGaiIQikw-nvpuMPU8Z7aCmD9Svs8uTSE-r41F7mxRITufr-oE0TnBRf0kjqCeaecusrh6jg6k-ucl74uVMc8',
+    notification: {
+      title: "TEST NOTIFICATION",
+      body: `Ceci est une notification de test des rservations.`,
+    },
+  };
+
+  const response = await admin.messaging().send(message);
+
+    return res.status(200).json({
+      status: "success",
+      message: "Notification envoyée.",
+      data: response,
+    });
+  } catch (error) {
+    console.error(`ERROR NOTIFICATION: ${error}`);
+    appendErrorLog(`ERROR NOTIFICATION: ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message: "Une erreur s'est produite lors de l'envoi de la notification.",
+    });
+  }
+}
+
+module.exports = { create, login, photo, updateToken, updatePassword, reservationlist, notification };

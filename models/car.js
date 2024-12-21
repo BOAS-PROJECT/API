@@ -26,11 +26,13 @@ module.exports = (sequelize, DataTypes) => {
     year: DataTypes.INTEGER,
     seats: DataTypes.INTEGER,
     fuel: DataTypes.STRING,
+    caution: DataTypes.DOUBLE,
     transmission: DataTypes.STRING,
     licensePlate: DataTypes.STRING,
     isDriver: DataTypes.BOOLEAN,
     isActive: DataTypes.BOOLEAN,
-    description: DataTypes.STRING,
+    descriptionWithDriver: DataTypes.TEXT,
+    descriptionWithoutDriver: DataTypes.TEXT,
     information: DataTypes.TEXT
   }, {
     sequelize,

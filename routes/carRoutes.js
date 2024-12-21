@@ -11,7 +11,6 @@ router.get("/list-with-driver", carController.listWithDriver);
 
 router.get("/list-without-driver", carController.listWithoutDriver);
 
-// RESERVATION DU VÉHICULE
 router.post("/reservation", fileUpload.single("image") , carController.reservation);
 
 module.exports = router;

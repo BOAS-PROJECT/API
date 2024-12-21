@@ -17,7 +17,8 @@ const create = async (req, res) => {
       transmission,
       licensePlate,
       isDriver,
-      description,
+      descriptionWithDriver,
+      descriptionWithoutDriver,
       fuel,
     } = req.body;
 
@@ -92,7 +93,8 @@ const create = async (req, res) => {
         });
     }
 
-    if (!description) {
+    // Que descriptionWithDriver ou descriptionWithoutDriver soit renseigné
+    if (!descriptionWithDriver && !descriptionWithoutDriver) {
       return res
         .status(400)
         .json({ error: "La description de la voiture est obligatoire." });
@@ -126,7 +128,8 @@ const create = async (req, res) => {
       licensePlate,
       isDriver,
       fuel,
-      description,
+      descriptionWithDriver,
+      descriptionWithoutDriver
     });
 
     return res.status(201).json({ 
@@ -239,7 +242,8 @@ const listWithoutDriver = async (req, res) => {
     transmission: car.transmission,
     licensePlate: car.licensePlate,
     fuel: car.fuel,
-    description: car.description,
+    descriptionWithoutDriver: car.descriptionWithoutDriver,
+    descriptionWithDriver: car.descriptionWithDriver,
     averageRating: parseFloat(car.getDataValue("averageRating")),
   }));
 
