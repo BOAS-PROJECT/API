@@ -37,6 +37,16 @@ module.exports = {
         allowNull: false,
         defaultValue: 0
       },
+      priceFuelwithDriver: {
+        type: Sequelize.DOUBLE,
+        allowNull: false,
+        defaultValue: 0
+      },
+      priceFuelWithoutDriver: {
+        type: Sequelize.DOUBLE,
+        allowNull: false,
+        defaultValue: 0
+      },
       model: {
         type: Sequelize.STRING,
         allowNull: false

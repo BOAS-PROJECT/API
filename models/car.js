@@ -22,6 +22,8 @@ module.exports = (sequelize, DataTypes) => {
     image: DataTypes.STRING,
     priceWithoutDriver: DataTypes.DOUBLE,
     priceWithDriver: DataTypes.DOUBLE,
+    priceFuelwithDriver: DataTypes.DOUBLE,
+    priceFuelWithoutDriver: DataTypes.DOUBLE,
     model: DataTypes.STRING,
     year: DataTypes.INTEGER,
     seats: DataTypes.INTEGER,
