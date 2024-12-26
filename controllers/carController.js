@@ -281,7 +281,7 @@ const listWithoutDriver = async (req, res) => {
 
 const reservation = async (req, res) => {
   try {
-    const tokenHeader = req.headers.authorization;
+    const token = req.headers.authorization;
     const { carId, payment, days, date, amount, description } = req.body;
     const host = req.get("host");
     const image = req.file;
