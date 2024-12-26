@@ -1,6 +1,7 @@
 const { Car, CarMake, Rating, User, PaymentMethod, Reservation } = require("../models");
 const sequelize = require("sequelize");
 const jwt = require("jsonwebtoken");
+const admin = require("firebase-admin");
 const { appendErrorLog } = require("../utils/logging");
 
 const create = async (req, res) => {
@@ -373,6 +374,18 @@ const reservation = async (req, res) => {
 
     const imagePath = `attachments/${image.filename}`;
     const imageUrl = `${req.protocol}://${host}/${imagePath}`;
+
+    // Envoi d'une notification au client, si un token est présent
+    if (customer.token) {
+      const message = {
+        token: customer.token,
+        notification: {
+          title: "Félicitations 👏🏽",
+          body: `Votre réservation de véhicule a été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !`,
+        },
+      };
+      await admin.messaging().send(message);
+    }
 
     await Reservation.create({
       userId: customer.id,
