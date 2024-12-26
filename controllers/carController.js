@@ -1,5 +1,6 @@
 const { Car, CarMake, Rating, User, PaymentMethod, Reservation } = require("../models");
 const sequelize = require("sequelize");
+const jwt = require("jsonwebtoken");
 const { appendErrorLog } = require("../utils/logging");
 
 const create = async (req, res) => {
@@ -280,16 +281,11 @@ const listWithoutDriver = async (req, res) => {
 
 const reservation = async (req, res) => {
   try {
-    const token = req.headers.authorization;
+    const tokenHeader = req.headers.authorization;
     const { carId, payment, days, date, amount, description } = req.body;
     const host = req.get("host");
     const image = req.file;
 
-    if (!token) {
-      return res
-        .status(401)
-        .json({ status: "error", message: "Token non fourni." });
-    }
     if (!days) {
       return res
         .status(400)
@@ -348,13 +344,13 @@ const reservation = async (req, res) => {
       }
       return res
         .status(401)
-        .json({ status: "error", message: "Token invalide." });
+        .json({ status: "error", message: `Token 401. ${error}` });
     }
 
     if (!decodedToken) {
       return res
         .status(401)
-        .json({ status: "error", message: "Token invalide." });
+        .json({ status: "error", message: "Token decode non fourni." });
     }
 
     const customerId = decodedToken.id;
