@@ -1,4 +1,4 @@
-const { Tourism, City, TourismImage, Reservation } = require("../models");
+const { Tourism, City, TourismImage, Reservation, User } = require("../models");
 const jwt = require("jsonwebtoken");
 const { appendErrorLog } = require("../utils/logging");
 
