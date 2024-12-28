@@ -342,7 +342,7 @@ const reservation = async (req, res) => {
       const message = {
         token: userToken,
         notification: {
-          title: "Félicitations 👏🏽",
+          title: "Félicitations!",
           body: `Votre réservation de votre logement a bien été prise en compte avec succès.`,
         },
       };

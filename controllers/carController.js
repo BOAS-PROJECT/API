@@ -381,7 +381,7 @@ const reservation = async (req, res) => {
       const message = {
         token: userToken,
         notification: {
-          title: "Félicitations 👏🏽",
+          title: "Félicitations!",
           body: `Votre réservation de véhicule a été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !`,
         },
       };
