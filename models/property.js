@@ -25,7 +25,9 @@ module.exports = (sequelize, DataTypes) => {
     description: DataTypes.TEXT,
     price: DataTypes.DOUBLE,
     surface: DataTypes.STRING,
-    image: DataTypes.STRING
+    image: DataTypes.STRING,
+    isActive: DataTypes.BOOLEAN,
+    isDaily: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'Property',

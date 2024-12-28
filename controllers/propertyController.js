@@ -1,4 +1,15 @@
-const { Property, PropertyType, PropertyImage, City, OwnerProperty, User, Car, PaymentMethod, Reservation } = require("../models");
+const {
+  Property,
+  PropertyType,
+  PropertyImage,
+  City,
+  OwnerProperty,
+  User,
+  Car,
+  PaymentMethod,
+  Reservation,
+} = require("../models");
+const admin = require("firebase-admin");
 const { appendErrorLog } = require("../utils/logging");
 
 const createtype = async (req, res) => {
@@ -48,10 +59,10 @@ const create = async (req, res) => {
     }
 
     if (!owner) {
-        return res.status(400).json({
-          status: "error",
-          message: "Le proprietaire du bien est obligatoire.",
-        });
+      return res.status(400).json({
+        status: "error",
+        message: "Le proprietaire du bien est obligatoire.",
+      });
     }
 
     const existingOwner = await OwnerProperty.findOne({ where: { id: owner } });
@@ -116,7 +127,9 @@ const create = async (req, res) => {
     const imagePath = `properties/${image.filename}`;
     const imageUrl = `${req.protocol}://${host}/${imagePath}`;
 
-    const existingProperty = await Property.findOne({ where: { title, cityId: city, typeId: type } });
+    const existingProperty = await Property.findOne({
+      where: { title, cityId: city, typeId: type },
+    });
     if (existingProperty) {
       return res.status(400).json({
         status: "error",
@@ -174,11 +187,14 @@ const createOwner = async (req, res) => {
       });
     }
 
-    const existingOwner = await OwnerProperty.findOne({ where: { name, phone } });
+    const existingOwner = await OwnerProperty.findOne({
+      where: { name, phone },
+    });
     if (existingOwner) {
       return res.status(400).json({
         status: "error",
-        message: "Un proprietaire avec ce nom et numéro de téléphone existe deja.",
+        message:
+          "Un proprietaire avec ce nom et numéro de téléphone existe deja.",
       });
     }
 
@@ -206,6 +222,7 @@ const list = async (req, res) => {
         { model: PropertyType, attributes: ["name"] },
         { model: City, attributes: ["name"] },
       ],
+      where: { isActive: true },
     });
 
     const formatedProperties = properties.map((property) => ({
@@ -217,6 +234,7 @@ const list = async (req, res) => {
       price: property.price,
       surface: property.surface,
       image: property.image,
+      isDaily: property.isDaily,
     }));
     return res.status(200).json({
       status: "success",
@@ -235,49 +253,33 @@ const list = async (req, res) => {
 const reservation = async (req, res) => {
   try {
     const token = req.headers.authorization;
-    const { carId, propertyId, payment, days, date, amount, description } = req.body;
+    const { propertyId, date, amount } = req.body;
 
     if (!token) {
       return res
         .status(401)
         .json({ status: "error", message: "Token non fourni." });
     }
-    if (!days) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "Le nombre de jours est obligatoire." });
-    }
+
     if (!date) {
       return res
         .status(400)
         .json({ status: "error", message: "La date est obligatoire." });
     }
+
     if (!amount) {
       return res
         .status(400)
         .json({ status: "error", message: "Le montant est obligatoire." });
     }
 
-    if (!payment) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "Le paiement est obligatoire." });
-    }
-    if (!carId) {
-      return res
-        .json({ status: "error", message: "ID de la voiture est obligatoire." });
-    }
-
     if (!propertyId) {
       return res
         .status(400)
-        .json({ status: "error", message: "ID de la propriete est obligatoire." });
-    }
-
-    if (!description) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "La description est obligatoire." });
+        .json({
+          status: "error",
+          message: "ID de la propriete est obligatoire.",
+        });
     }
 
     // Vérifie si l'en-tête commence par "Bearer "
@@ -314,42 +316,41 @@ const reservation = async (req, res) => {
     const customerId = decodedToken.id;
     const customer = await User.findByPk(customerId);
     if (!customer) {
-        return res.status(400).json({ status: "error", message: "Le client n'existe pas." });
-    }
-
-    const car = await Car.findByPk(carId);
-    if (!car) {
-      return res.status(400).json({ status: "error", message: "La voiture n'existe pas." });
+      return res
+        .status(400)
+        .json({ status: "error", message: "Le client n'existe pas." });
     }
 
     const property = await Property.findByPk(propertyId);
     if (!property) {
-      return res.status(400).json({ status: "error", message: "Le logement n'existe pas." });
-    }
-
-    const paymentMethod = await PaymentMethod.findByPk(payment);
-    if (!paymentMethod) {
       return res
         .status(400)
-        .json({ status: "error", message: "Le moyen de paiement n'existe pas." });
+        .json({ status: "error", message: "Le logement n'existe pas." });
     }
-
 
     await Reservation.create({
       userId: customer.id,
-      carId: carId,
       propertyId: propertyId,
-      paymentMethodId: payment,
-      days,
+      paymentMethodId: 1,
       date,
-      amount,
       status: 1,
-      description
     });
+
+    if (customer.token) {
+      const message = {
+        token: customer.token,
+        notification: {
+          title: "Félicitations 👏🏽",
+          body: `Votre réservation de votre logement a bien été prise en compte avec succès.`,
+        },
+      };
+      await admin.messaging().send(message);
+    }
 
     return res.status(201).json({
       status: "success",
-      message: "Votre réservation de véhicule vers votre logement a bien été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !",
+      message:
+        "Votre réservation de votre logement a bien été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !",
     });
   } catch (error) {
     console.error(`ERROR RESERVATION CARMOVING: ${error}`);
@@ -361,11 +362,10 @@ const reservation = async (req, res) => {
   }
 };
 
-
 module.exports = {
   createtype,
   create,
   createOwner,
   list,
-  reservation
+  reservation,
 };
