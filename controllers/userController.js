@@ -608,7 +608,7 @@ const reservationlist = async (req, res) => {
         date: formattedDate,
         amount: reservation.amount,
         description: reservation.description,
-        status: reservation.status === 0 ? "En attente" : "Confirmé",
+        status: reservation.status === 1 ? "En attente" : "Confirmé",
       };
     });
 
