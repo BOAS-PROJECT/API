@@ -338,8 +338,9 @@ const reservation = async (req, res) => {
     });
 
     if (customer.token) {
+      const userToken = customer.token;
       const message = {
-        token: customer.token,
+        token: userToken,
         notification: {
           title: "Félicitations 👏🏽",
           body: `Votre réservation de votre logement a bien été prise en compte avec succès.`,

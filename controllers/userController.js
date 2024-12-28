@@ -3,7 +3,16 @@ const bcrypt = require("bcrypt");
 const sharp = require("sharp");
 const path = require("path");
 const admin = require("firebase-admin");
-const { User, Reservation, Car, Driver, Pharmacy, Tourism, Leisure, CarMoving } = require("../models");
+const {
+  User,
+  Reservation,
+  Car,
+  Driver,
+  Pharmacy,
+  Tourism,
+  Leisure,
+  CarMoving,
+} = require("../models");
 const { appendErrorLog } = require("../utils/logging");
 const { token } = require("morgan");
 
@@ -11,7 +20,8 @@ const create = async (req, res) => {
   try {
     const host = req.get("host");
     const photo = req.file;
-    const { firstname, lastname, genre, city, email, phone, password } = req.body;
+    const { firstname, lastname, genre, city, email, phone, password } =
+      req.body;
     if (!firstname) {
       return res.status(400).json({
         status: "error",
@@ -72,17 +82,17 @@ const create = async (req, res) => {
       });
     }
 
-     // Générez et enregistrez l'image et le thumbnail
-     const imagePath = `users/${photo.filename}`;
-     const imageUrl = `${req.protocol}://${host}/${imagePath}`;
-     const thumbnailFilename = `thumb_${photo.filename}`;
-     const thumbnailPath = `users/${thumbnailFilename}`;
-     const thumbnailUrl = `${req.protocol}://${host}/${thumbnailPath}`;
- 
-     // Créer le thumbnail avec sharp
-     await sharp(photo.path)
-       .resize(200, 200) // Taille du thumbnail
-       .toFile(path.join(__dirname, `../public/${thumbnailPath}`));
+    // Générez et enregistrez l'image et le thumbnail
+    const imagePath = `users/${photo.filename}`;
+    const imageUrl = `${req.protocol}://${host}/${imagePath}`;
+    const thumbnailFilename = `thumb_${photo.filename}`;
+    const thumbnailPath = `users/${thumbnailFilename}`;
+    const thumbnailUrl = `${req.protocol}://${host}/${thumbnailPath}`;
+
+    // Créer le thumbnail avec sharp
+    await sharp(photo.path)
+      .resize(200, 200) // Taille du thumbnail
+      .toFile(path.join(__dirname, `../public/${thumbnailPath}`));
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -121,7 +131,6 @@ const create = async (req, res) => {
       status: "success",
       data: response,
     });
-    
   } catch (error) {
     console.error(`ERROR CREATE ACCOUNT USER: ${error}`);
     appendErrorLog(`ERROR CREATE ACCOUNT USER: ${error}`);
@@ -148,12 +157,13 @@ const login = async (req, res) => {
         message: "Le mot de passe est obligatoire.",
       });
     }
-    
+
     const user = await User.findOne({ where: { phone } });
     if (!user) {
       return res.status(400).json({
         status: "error",
-        message: "Le compte n'existe pas, veuillez vous inscrire s'il vous plais.",
+        message:
+          "Le compte n'existe pas, veuillez vous inscrire s'il vous plais.",
       });
     }
 
@@ -161,7 +171,8 @@ const login = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(400).json({
         status: "error",
-        message: "Le mot de passe est incorrect. Veuillez réessayer s'il vous plais.",
+        message:
+          "Le mot de passe est incorrect. Veuillez réessayer s'il vous plais.",
       });
     }
 
@@ -191,7 +202,6 @@ const login = async (req, res) => {
       status: "success",
       data: response,
     });
-    
   } catch (error) {
     console.error(`ERROR LOGIN USER: ${error}`);
     appendErrorLog(`ERROR LOGIN USER: ${error}`);
@@ -200,7 +210,7 @@ const login = async (req, res) => {
       message: "Une erreur s'est produite lors de la connexion.",
     });
   }
-}
+};
 
 const photo = async (req, res) => {
   try {
@@ -353,8 +363,6 @@ const updateToken = async (req, res) => {
       status: "success",
       message: "Token mis à jour avec succes.",
     });
-
-    
   } catch (error) {
     console.error(`ERROR UPDATE TOKEN USER: ${error}`);
     appendErrorLog(`ERROR UPDATE TOKEN USER: ${error}`);
@@ -363,7 +371,7 @@ const updateToken = async (req, res) => {
       message: "Une erreur s'est produite lors de la mise à jour du token.",
     });
   }
-}
+};
 
 const updatePassword = async (req, res) => {
   try {
@@ -498,20 +506,51 @@ const reservationlist = async (req, res) => {
       include: [
         {
           model: Reservation,
-          attributes: [
-            "id",
-            "status",
-            "amount",
-            "date",
-            "description",
-          ],
+          attributes: ["id", "status", "amount", "date", "description"],
           include: [
-            { model: Car, attributes: ["name", "image", "priceWithoutDriver", "priceWithDriver", "licensePlate"], required: false },
-            { model: Driver, attributes: ["firstName", "lastName", "maritalStatus", "numberPlate", "phone", "photo"], required: false },
-            { model: Pharmacy, attributes: ["name", "address"], required: false },
-            { model: Tourism, attributes: ["title", "descriptions", "image"], required: false },
-            { model: Leisure, attributes: ["title", "description"], required: false },
-            { model: CarMoving, attributes: ["name", "image", "price", "licensePlate"], required: false },
+            {
+              model: Car,
+              attributes: [
+                "name",
+                "image",
+                "priceWithoutDriver",
+                "priceWithDriver",
+                "licensePlate",
+              ],
+              required: false,
+            },
+            {
+              model: Driver,
+              attributes: [
+                "firstName",
+                "lastName",
+                "maritalStatus",
+                "numberPlate",
+                "phone",
+                "photo",
+              ],
+              required: false,
+            },
+            {
+              model: Pharmacy,
+              attributes: ["name", "address"],
+              required: false,
+            },
+            {
+              model: Tourism,
+              attributes: ["title", "descriptions", "image"],
+              required: false,
+            },
+            {
+              model: Leisure,
+              attributes: ["title", "description"],
+              required: false,
+            },
+            {
+              model: CarMoving,
+              attributes: ["name", "image", "price", "licensePlate"],
+              required: false,
+            },
           ],
         },
       ],
@@ -565,8 +604,6 @@ const reservationlist = async (req, res) => {
       };
     });
 
-    
-
     return res.status(200).json({
       status: "success",
       data: formattedReservations,
@@ -576,24 +613,27 @@ const reservationlist = async (req, res) => {
     appendErrorLog(`ERROR LIST RESERVATION: ${error}`);
     return res.status(500).json({
       status: "error",
-      message: "Une erreur s'est produite lors de la récupération des réservations.",
+      message:
+        "Une erreur s'est produite lors de la récupération des réservations.",
     });
   }
 };
 
 const notification = async (req, res) => {
   try {
-   // const customers = await User.findAll();
+    const customers = await User.findAll();
 
-  const message = {
-    token:'dK5IN3wOQ_S-I_X5KKvZ1v:APA91bGh7Bao8pR6WVffXSpB6kMsVn4p1pwGaiIQikw-nvpuMPU8Z7aCmD9Svs8uTSE-r41F7mxRITufr-oE0TnBRf0kjqCeaecusrh6jg6k-ucl74uVMc8',
-    notification: {
-      title: "TEST NOTIFICATION",
-      body: `Ceci est une notification de test des rservations.`,
-    },
-  };
-
-  const response = await admin.messaging().send(message);
+    customers.forEach(async (customer) => {
+      const token = customer.token;
+      const message = {
+        token: token,
+        notification: {
+          title: "TEST NOTIFICATION",
+          body: `Ceci est une notification de test des rservations.`,
+        },
+      };
+      await admin.messaging().send(message);
+    });
 
     return res.status(200).json({
       status: "success",
@@ -608,6 +648,14 @@ const notification = async (req, res) => {
       message: "Une erreur s'est produite lors de l'envoi de la notification.",
     });
   }
-}
+};
 
-module.exports = { create, login, photo, updateToken, updatePassword, reservationlist, notification };
+module.exports = {
+  create,
+  login,
+  photo,
+  updateToken,
+  updatePassword,
+  reservationlist,
+  notification,
+};
