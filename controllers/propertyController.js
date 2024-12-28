@@ -9,6 +9,7 @@ const {
   PaymentMethod,
   Reservation,
 } = require("../models");
+const jwt = require("jsonwebtoken");
 const admin = require("firebase-admin");
 const { appendErrorLog } = require("../utils/logging");
 
