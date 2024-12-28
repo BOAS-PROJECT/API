@@ -12,6 +12,7 @@ const {
   Tourism,
   Leisure,
   CarMoving,
+  Property,
 } = require("../models");
 const { appendErrorLog } = require("../utils/logging");
 const { token } = require("morgan");
@@ -551,6 +552,11 @@ const reservationlist = async (req, res) => {
               attributes: ["name", "image", "price", "licensePlate"],
               required: false,
             },
+            {
+              model: Property,
+              attributes: ["title", "image", "price"],
+              required: false,
+            }
           ],
         },
       ],
@@ -585,6 +591,8 @@ const reservationlist = async (req, res) => {
         type = "Réservation de Loisirs";
       } else if (reservation.CarMoving) {
         type = "Réservation véhicule de déménagement";
+      } else if (reservation.Property) {
+        type = "Réservation logement";
       }
 
       const formattedDate = new Date(reservation.date).toLocaleString("fr-FR", {
@@ -600,7 +608,7 @@ const reservationlist = async (req, res) => {
         date: formattedDate,
         amount: reservation.amount,
         description: reservation.description,
-        status: reservation.status === 0 ? "Pending" : "Confirmed",
+        status: reservation.status === 0 ? "En attente" : "Confirmé",
       };
     });
 
