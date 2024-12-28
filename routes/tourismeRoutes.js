@@ -9,4 +9,7 @@ router.post("/create", upload.single("image") , tourismController.create);
 // LISTE DES SITES TOURISTIQUES
 router.get("/list", tourismController.list);
 
+// RESERVATION DU BIEN
+router.post("/reservation", tourismController.reservation);
+
 module.exports = router;
