@@ -1,4 +1,5 @@
 const { Tourism, City, TourismImage, Reservation } = require("../models");
+const jwt = require("jsonwebtoken");
 const { appendErrorLog } = require("../utils/logging");
 
 const create = async (req, res) => {
@@ -122,7 +123,7 @@ const list = async (req, res) => {
 const reservation = async (req, res) => {
   try {
     const token = req.headers.authorization;
-    const { tourismId, date, } = req.body;
+    const { tourismId, date } = req.body;
 
     if (!token) {
       return res
