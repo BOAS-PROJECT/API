@@ -1,4 +1,4 @@
-const { Leisure, LeisureImage, Reservation } = require("../models");
+const { Leisure, LeisureImage, Reservation, User } = require("../models");
 const jwt = require("jsonwebtoken");
 const admin = require("firebase-admin");
 const { appendErrorLog } = require("../utils/logging");
