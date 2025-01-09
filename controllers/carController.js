@@ -171,7 +171,7 @@ const listWithDriver = async (req, res) => {
    if (!cityid) {
      return res
        .status(400)
-       .json({ error: "ID de la ville est obligatoire." });
+       .json({ status: "error" ,message: "ID de la ville est obligatoire." });
    }
    const cars = await Car.findAll({
     where: { isDriver: true, cityId: cityid },
@@ -237,7 +237,7 @@ const listWithoutDriver = async (req, res) => {
    if (!cityid) {
      return res
        .status(400)
-       .json({ error: "ID de la ville est obligatoire." });
+       .json({ status: "error", message: "ID de la ville est obligatoire." });
    }
    const cars = await Car.findAll({
     where: { isDriver: false, cityId: cityid },

@@ -14,7 +14,23 @@ const create = async (req, res) => {
   try {
     const host = req.get("host");
     const image = req.file;
-    const { makeId, name, volume, tonage, price, priceHandling, licensePlate, description } = req.body;
+    const {
+      cityId,
+      makeId,
+      name,
+      volume,
+      tonage,
+      price,
+      priceHandling,
+      licensePlate,
+      description,
+    } = req.body;
+
+    if (!cityId) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "ID de la ville est obligatoire." });
+    }
 
     if (!makeId) {
       return res
@@ -25,61 +41,86 @@ const create = async (req, res) => {
     if (!name) {
       return res
         .status(400)
-        .json({ status: "error", message:  "Le nom de la voiture est obligatoire." });
+        .json({
+          status: "error",
+          message: "Le nom de la voiture est obligatoire.",
+        });
     }
 
     if (!volume) {
       return res
         .status(400)
-        .json({ status: "error", message:  "Le volume de la voiture est obligatoire." });
+        .json({
+          status: "error",
+          message: "Le volume de la voiture est obligatoire.",
+        });
     }
 
     if (!tonage) {
       return res
         .status(400)
-        .json({ status: "error", message:  "Le tonnage de la voiture est obligatoire." });
+        .json({
+          status: "error",
+          message: "Le tonnage de la voiture est obligatoire.",
+        });
     }
 
     if (!price) {
       return res
         .status(400)
-        .json({ status: "error", message:  "Le prix de la voiture est obligatoire." });
+        .json({
+          status: "error",
+          message: "Le prix de la voiture est obligatoire.",
+        });
     }
 
     if (!licensePlate) {
       return res
         .status(400)
-        .json({ status: "error", message:  "Le plaque d'immatriculation de la voiture est obligatoire." });
+        .json({
+          status: "error",
+          message: "Le plaque d'immatriculation de la voiture est obligatoire.",
+        });
     }
 
-    if(!priceHandling){
+    if (!priceHandling) {
       return res.status(400).json({
-       status: "error", message: "Le prix de la voiture est obligatoire.",
+        status: "error",
+        message: "Le prix de la voiture est obligatoire.",
       });
     }
 
     if (!description) {
       return res
         .status(400)
-        .json({ status: "error", message:  "La description de la voiture est obligatoire." });
+        .json({
+          status: "error",
+          message: "La description de la voiture est obligatoire.",
+        });
     }
 
     const carMake = await CarMake.findByPk(makeId);
     if (!carMake) {
       return res
         .status(400)
-        .json({ status: "error", message:  "La marque de la voiture n'existe pas." });
+        .json({
+          status: "error",
+          message: "La marque de la voiture n'existe pas.",
+        });
     }
 
     const existingCar = await CarMoving.findOne({ where: { name } });
     if (existingCar) {
-      return res.status(400).json({ status: "error", message:  "La voiture existe deja." });
+      return res
+        .status(400)
+        .json({ status: "error", message: "La voiture existe deja." });
     }
 
     const imagePath = `cars/${image.filename}`;
     const imageUrl = `${req.protocol}://${host}/${imagePath}`;
 
     await CarMoving.create({
+      cityId,
       makeId,
       name,
       image: imageUrl,
@@ -88,7 +129,7 @@ const create = async (req, res) => {
       price,
       priceHandling,
       licensePlate,
-      description
+      description,
     });
 
     return res.status(201).json({
@@ -107,7 +148,13 @@ const create = async (req, res) => {
 
 const list = async (req, res) => {
   try {
+    const cityid = req.headers.cityid;
+    if (!cityid) {
+      return res.status(400).json({ status: "error" ,message: "ID de la ville est obligatoire." });
+    }
+
     const cars = await CarMoving.findAll({
+      where: { cityId: cityid },
       attributes: { exclude: ["createdAt", "updatedAt"] },
       include: {
         model: CarMake,
@@ -125,7 +172,7 @@ const list = async (req, res) => {
       price: car.price,
       priceHandling: car.priceHandling,
       licensePlate: car.licensePlate,
-      description: car.description
+      description: car.description,
     }));
 
     return res.status(200).json({
@@ -155,7 +202,10 @@ const reservation = async (req, res) => {
     if (!days) {
       return res
         .status(400)
-        .json({ status: "error", message: "Le nombre de jours est obligatoire." });
+        .json({
+          status: "error",
+          message: "Le nombre de jours est obligatoire.",
+        });
     }
     if (!date) {
       return res
@@ -170,7 +220,10 @@ const reservation = async (req, res) => {
     if (!carId) {
       return res
         .status(400)
-        .json({ status: "error", message: "L'ID de la véhicule est obligatoire." });
+        .json({
+          status: "error",
+          message: "L'ID de la véhicule est obligatoire.",
+        });
     }
 
     if (!description) {
@@ -213,12 +266,16 @@ const reservation = async (req, res) => {
     const customerId = decodedToken.id;
     const customer = await User.findByPk(customerId);
     if (!customer) {
-        return res.status(400).json({ status: "error", message: "Le client n'existe pas." });
+      return res
+        .status(400)
+        .json({ status: "error", message: "Le client n'existe pas." });
     }
 
     const car = await CarMoving.findByPk(carId);
     if (!car) {
-      return res.status(400).json({ status: "error", message: "Le véhicule n'existe pas." });
+      return res
+        .status(400)
+        .json({ status: "error", message: "Le véhicule n'existe pas." });
     }
 
     await Reservation.create({
@@ -234,7 +291,8 @@ const reservation = async (req, res) => {
 
     return res.status(201).json({
       status: "success",
-      message: "Votre réservation de véhicule de déménagement a été prise en compte avec succès. Vous serrez contacté sous peu, merci.",
+      message:
+        "Votre réservation de véhicule de déménagement a été prise en compte avec succès. Vous serrez contacté sous peu, merci.",
     });
   } catch (error) {
     console.error(`ERROR RESERVATION CARMOVING: ${error}`);
