@@ -23,7 +23,6 @@ const createtype = async (req, res) => {
         message: "Le nom de la propriete est obligatoire.",
       });
     }
-
     const existingType = await PropertyType.findOne({ where: { name } });
     if (existingType) {
       return res.status(400).json({
@@ -216,14 +215,20 @@ const createOwner = async (req, res) => {
 
 const list = async (req, res) => {
   try {
+    const cityid = req.headers.cityid;
     const properties = await Property.findAll({
       attributes: { exclude: ["createdAt", "updatedAt"] },
       order: [["id", "DESC"]],
       include: [
         { model: PropertyType, attributes: ["name"] },
         { model: City, attributes: ["name"] },
+        { 
+          model: PropertyImage, 
+          attributes: ["image"], 
+          as: "PropertyImages" 
+        },
       ],
-      where: { isActive: true },
+      where: { isActive: true, cityId: cityid },
     });
 
     const formatedProperties = properties.map((property) => ({
@@ -235,21 +240,24 @@ const list = async (req, res) => {
       price: property.price,
       surface: property.surface,
       image: property.image,
+      images: property.PropertyImages.map((img) => img.image),
       isDaily: property.isDaily,
     }));
+
     return res.status(200).json({
       status: "success",
       data: formatedProperties,
     });
   } catch (error) {
-    console.error(`ERROR LIST PHARMACIES: ${error}`);
-    appendErrorLog(`ERROR LIST PHARMACIES: ${error}`);
+    console.error(`ERROR LIST PROPERTIES: ${error}`);
+    appendErrorLog(`ERROR LIST PROPERTIES: ${error}`);
     return res.status(500).json({
       status: "error",
-      message: "Une erreur s'est produite lors de la creation de la pharmacie.",
+      message: "Une erreur s'est produite lors de la récupération des propriétés.",
     });
   }
 };
+
 
 const reservation = async (req, res) => {
   try {
