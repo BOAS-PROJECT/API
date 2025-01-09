@@ -7,7 +7,7 @@ const create = async (req, res) => {
   try {
     const host = req.get("host");
     const image = req.file;
-    const { city, title, description } = req.body;
+    const { city, title, description, address } = req.body;
 
     if (!city) {
       return res.status(400).json({
@@ -27,6 +27,13 @@ const create = async (req, res) => {
       return res.status(400).json({
         status: "error",
         message: "La description est obligatoire.",
+      });
+    }
+
+    if (!address) {
+      return res.status(400).json({
+        status: "error",
+        message: "L'adresse est obligatoire.",
       });
     }
 
@@ -61,6 +68,7 @@ const create = async (req, res) => {
       title,
       descriptions: description,
       image: imageUrl,
+      address,
     });
 
     return res.status(201).json({
@@ -78,8 +86,17 @@ const create = async (req, res) => {
 };
 
 const list = async (req, res) => {
+
     try {
+      const cityid = req.headers.cityid;
+        if (!cityid) {
+            return res.status(400).json({
+                status: "error",
+                message: "La ville est obligatoire.",
+            });
+        }
         const images = await Tourism.findAll({
+            where: { cityId: cityid },
             exclude: ["createdAt", "updatedAt"],
             include: [
                 {
@@ -99,6 +116,7 @@ const list = async (req, res) => {
             description: tourism.descriptions,
             image: tourism.image,
             city: tourism.City.name,
+            address: tourism.address,
             images: tourism.TourismImages.map((image) => {
                 return {
                     image: image.image,

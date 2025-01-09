@@ -27,6 +27,10 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: false
       },
+      address: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
       image: {
         type: Sequelize.STRING,
         allowNull: false
