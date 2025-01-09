@@ -9,6 +9,7 @@ const create = async (req, res) => {
     const host = req.get("host");
     const image = req.file;
     const {
+      cityId,
       makeId,
       name,
       priceNormal,
@@ -24,6 +25,12 @@ const create = async (req, res) => {
       fuel,
       caution,
     } = req.body;
+
+    if (!cityId) {
+      return res
+        .status(400)
+        .json({ error: "ID de la ville est obligatoire." });
+    }
 
     if (!makeId) {
       return res
@@ -125,6 +132,7 @@ const create = async (req, res) => {
     const imageUrl = `${req.protocol}://${host}/${imagePath}`;
 
     await Car.create({
+      cityId,
       makeId,
       name,
       image: imageUrl,
@@ -159,8 +167,14 @@ const create = async (req, res) => {
 
 const listWithDriver = async (req, res) => {
   try {
+   const cityid = req.headers.cityid;
+   if (!cityid) {
+     return res
+       .status(400)
+       .json({ error: "ID de la ville est obligatoire." });
+   }
    const cars = await Car.findAll({
-    where: { isDriver: true },
+    where: { isDriver: true, cityId: cityid },
     attributes: {
       exclude: ["createdAt", "updatedAt", "priceWithoutDriver"],
       include: [
@@ -219,13 +233,17 @@ const listWithDriver = async (req, res) => {
 
 const listWithoutDriver = async (req, res) => {
   try {
-
+   const cityid = req.headers.cityid;
+   if (!cityid) {
+     return res
+       .status(400)
+       .json({ error: "ID de la ville est obligatoire." });
+   }
    const cars = await Car.findAll({
-    where: { isDriver: true },
+    where: { isDriver: false, cityId: cityid },
     attributes: {
       exclude: ["createdAt", "updatedAt", "priceWithDriver"],
       include: [
-        // Calculer la moyenne des notations avec une sous-requête
         [
           sequelize.literal(
             `(SELECT COALESCE(AVG(rating), 5) 
@@ -413,6 +431,5 @@ const reservation = async (req, res) => {
     });
   }
 };
-
 
 module.exports = { create,listWithDriver, listWithoutDriver, reservation };
