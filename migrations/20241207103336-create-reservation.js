@@ -113,9 +113,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true
       },
-      description: {
-        type: Sequelize.TEXT,
-        allowNull: true
+      type: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0
       },
       createdAt: {
         allowNull: false,

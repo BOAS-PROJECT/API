@@ -507,7 +507,7 @@ const reservationlist = async (req, res) => {
       include: [
         {
           model: Reservation,
-          attributes: ["id", "status", "amount", "date", "description"],
+          attributes: ["id", "status", "amount", "date", "type"],
           include: [
             {
               model: Car,
@@ -607,7 +607,7 @@ const reservationlist = async (req, res) => {
         type,
         date: formattedDate,
         amount: reservation.amount,
-        description: reservation.description,
+        description: reservation.type,
         status: reservation.status === 1 ? "En attente" : "Confirmé",
       };
     });
