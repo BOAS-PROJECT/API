@@ -90,6 +90,16 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
+      propertyId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'Properties',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      },
       attachment: {
         type: Sequelize.STRING,
         allowNull: true,

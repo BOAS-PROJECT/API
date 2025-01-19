@@ -237,8 +237,8 @@ const reservation = async (req, res) => {
         "La réservation du site touristique à bien été prise en compte avec succès. Vous serez contacté par l'agence BOAS Service pour confirmer votre reservation. Merci de votre confiance !",
     });
   } catch (error) {
-    console.error(`ERROR RESERVATION CARMOVING: ${error}`);
-    appendErrorLog(`ERROR RESERVATION CARMOVING: ${error}`);
+    console.error(`ERROR RESERVATION TOURISME: ${error}`);
+    appendErrorLog(`ERROR RESERVATION TOURISME: ${error}`);
     return res.status(500).json({
       status: "error",
       message: "Une erreur s'est produite lors de la creation du compte.",
