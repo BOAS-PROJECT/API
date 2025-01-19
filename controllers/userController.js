@@ -650,7 +650,7 @@ const notification = async (req, res) => {
       const token = customer.token;
       const message = {
         token: token,
-        notification: {
+        data: {
           title: "TEST NOTIFICATION",
           body: `Ceci est une notification de test des rservations.`,
         },
