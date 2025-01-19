@@ -129,12 +129,18 @@ const reservation = async (req, res) => {
       const userToken = customer.token;
       const message = {
         token: userToken,
-        data: {
+        notification: {
           title: "Félicitations!",
-          body: `Votre reservation de ${leisure.title} à bien ete prise en compte.`,
+          body: `Votre réservation de ${leisure.title} a bien été prise en compte.`,
         },
       };
-      await admin.messaging().send(message);
+
+      try {
+        await admin.messaging().send(message);
+        console.log(`Notification envoyée à l'utilisateur avec le token : ${userToken}`);
+      } catch (error) {
+        console.error(`Erreur lors de l'envoi de la notification : ${error.message}`);
+      }
     }
 
     return res.status(201).json({

@@ -289,6 +289,24 @@ const reservation = async (req, res) => {
       description,
     });
 
+    if (customer.token) {
+      const userToken = customer.token;
+      const message = {
+        token: userToken,
+        notification: {
+          title: "Félicitations!",
+          body: `Votre réservation de véhicule de déménagement a été prise en compte avec succès. Vous serrez contacté sous peu, merci.`,
+        },
+      };
+
+      try {
+        await admin.messaging().send(message);
+        console.log(`Notification envoyée à l'utilisateur avec le token : ${userToken}`);
+      } catch (error) {
+        console.error(`Erreur lors de l'envoi de la notification : ${error.message}`);
+      }
+    }
+
     return res.status(201).json({
       status: "success",
       message:

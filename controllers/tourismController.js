@@ -86,7 +86,6 @@ const create = async (req, res) => {
 };
 
 const list = async (req, res) => {
-
     try {
       const cityid = req.headers.cityid;
         if (!cityid) {
@@ -223,12 +222,18 @@ const reservation = async (req, res) => {
       const userToken = customer.token;
       const message = {
         token: userToken,
-        data: {
+        notification: {
           title: "Félicitations!",
           body: `Votre reservation du site touristique a bien ete prise en compte.`,
         },
       };
-      await admin.messaging().send(message);
+
+      try {
+        await admin.messaging().send(message);
+        console.log(`Notification envoyée à l'utilisateur avec le token : ${userToken}`);
+      } catch (error) {
+        console.error(`Erreur lors de l'envoi de la notification : ${error.message}`);
+      }
     }
 
     return res.status(201).json({

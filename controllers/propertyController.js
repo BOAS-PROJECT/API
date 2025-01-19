@@ -349,14 +349,21 @@ const reservation = async (req, res) => {
       const userToken = customer.token;
       const message = {
         token: userToken,
-        data: {
+        notification: {
           title: "Félicitations!",
           body: `Votre réservation de votre logement a bien été prise en compte avec succès.`,
         },
       };
-      await admin.messaging().send(message);
-    }
 
+      try {
+        await admin.messaging().send(message);
+        console.log(`Notification envoyée à l'utilisateur avec le token : ${userToken}`);
+      } catch (error) {
+        console.error(`Erreur lors de l'envoi de la notification : ${error.message}`);
+        // Vous pouvez également enregistrer cette erreur dans vos logs pour un examen ultérieur
+      }
+    }
+    
     return res.status(201).json({
       status: "success",
       message:

@@ -392,12 +392,19 @@ const reservation = async (req, res) => {
       const userToken = customer.token;
       const message = {
         token: userToken,
-        data: {
+        notification: {
           title: "Félicitations!",
           body: `Votre réservation de véhicule a été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !`,
         },
       };
-      await admin.messaging().send(message);
+
+      try {
+        await admin.messaging().send(message);
+        console.log(`Notification envoyée à l'utilisateur avec le token : ${userToken}`);
+      } catch (error) {
+        console.error(`Erreur lors de l'envoi de la notification : ${error.message}`);
+        // Vous pouvez également enregistrer cette erreur dans vos logs pour un examen ultérieur
+      }
     }
 
     await Reservation.create({
