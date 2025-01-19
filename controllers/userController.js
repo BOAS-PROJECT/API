@@ -20,9 +20,10 @@ const { token } = require("morgan");
 const create = async (req, res) => {
   try {
     const host = req.get("host");
-    const photo = req.file;
-    const { firstname, lastname, genre, city, email, phone, password } =
-      req.body;
+    const photo = req.file; // Peut être undefined si aucune photo n'est envoyée
+    const { firstname, lastname, genre, city, email, phone, password } = req.body;
+
+    // Vérifications des champs obligatoires
     if (!firstname) {
       return res.status(400).json({
         status: "error",
@@ -65,6 +66,7 @@ const create = async (req, res) => {
       });
     }
 
+    // Vérifications des doublons sur le téléphone ou l'email
     const existingUser = await User.findOne({ where: { phone } });
     if (existingUser) {
       return res.status(400).json({
@@ -83,20 +85,27 @@ const create = async (req, res) => {
       });
     }
 
-    // Générez et enregistrez l'image et le thumbnail
-    const imagePath = `users/${photo.filename}`;
-    const imageUrl = `${req.protocol}://${host}/${imagePath}`;
-    const thumbnailFilename = `thumb_${photo.filename}`;
-    const thumbnailPath = `users/${thumbnailFilename}`;
-    const thumbnailUrl = `${req.protocol}://${host}/${thumbnailPath}`;
+    // Gestion des images (si une photo est fournie)
+    let imageUrl = null;
+    let thumbnailUrl = null;
 
-    // Créer le thumbnail avec sharp
-    await sharp(photo.path)
-      .resize(200, 200) // Taille du thumbnail
-      .toFile(path.join(__dirname, `../public/${thumbnailPath}`));
+    if (photo) {
+      const imagePath = `users/${photo.filename}`;
+      imageUrl = `${req.protocol}://${host}/${imagePath}`;
+      const thumbnailFilename = `thumb_${photo.filename}`;
+      const thumbnailPath = `users/${thumbnailFilename}`;
+      thumbnailUrl = `${req.protocol}://${host}/${thumbnailPath}`;
 
+      // Créer le thumbnail avec sharp
+      await sharp(photo.path)
+        .resize(200, 200) // Taille du thumbnail
+        .toFile(path.join(__dirname, `../public/${thumbnailPath}`));
+    }
+
+    // Hashage du mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Création de l'utilisateur dans la base de données
     const user = await User.create({
       firstname,
       lastname,
@@ -104,11 +113,12 @@ const create = async (req, res) => {
       city,
       email,
       phone,
-      photo: imageUrl ?? null,
-      thumbnail: thumbnailUrl ?? null,
+      photo: imageUrl, // Null si aucune photo
+      thumbnail: thumbnailUrl, // Null si aucune photo
       password: hashedPassword,
     });
 
+    // Génération du token JWT
     const token = jwt.sign(
       {
         id: user.id,
@@ -117,6 +127,7 @@ const create = async (req, res) => {
       process.env.JWT_SECRET
     );
 
+    // Construction de la réponse
     const response = {
       firstname: user.firstname,
       lastname: user.lastname,
@@ -125,6 +136,8 @@ const create = async (req, res) => {
       city: user.city,
       email: user.email,
       phone: user.phone,
+      photo: user.photo,
+      thumbnail: user.thumbnail,
       token,
     };
 
@@ -141,6 +154,7 @@ const create = async (req, res) => {
     });
   }
 };
+
 
 const login = async (req, res) => {
   try {
