@@ -518,6 +518,7 @@ const reservationlist = async (req, res) => {
     const userId = decodedToken.id;
 
     const user = await User.findByPk(userId, {
+      order: [["createdAt", "DESC"]],
       include: [
         {
           model: Reservation,
