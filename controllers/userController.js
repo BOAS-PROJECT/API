@@ -682,6 +682,114 @@ const notification = async (req, res) => {
   }
 };
 
+const cancelReservation = async (req, res) => {
+  try {
+    const { reservationId } = req.body; // ID de la réservation à annuler
+    const token = req.headers.authorization;
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token non fourni." });
+    }
+
+    // Vérifie si l'en-tête commence par "Bearer "
+    if (!token.startsWith("Bearer ")) {
+      return res.status(401).json({
+        status: "error",
+        message: "Format de token invalide.",
+      });
+    }
+
+    // Extrait le token en supprimant le préfixe "Bearer "
+    const customToken = token.substring(7);
+    let decodedToken;
+
+    try {
+      decodedToken = jwt.verify(customToken, process.env.JWT_SECRET);
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .json({ status: "error", message: "Votre session a expiré." });
+      }
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token invalide." });
+    }
+
+    const userId = decodedToken.id;
+
+    // Vérifier si la réservation existe et appartient à l'utilisateur
+    const reservation = await Reservation.findOne({
+      where: {
+        id: reservationId,
+        userId: userId, // Assure que la réservation appartient au bon utilisateur
+      },
+      include: [
+        {
+          model: User,
+          attributes: ["name", "token"], // Pour la notification
+        },
+      ],
+    });
+
+    if (!reservation) {
+      return res.status(404).json({
+        status: "error",
+        message: "Réservation non trouvée ou n'appartient pas à l'utilisateur.",
+      });
+    }
+
+    // Vérifier si la réservation est déjà annulée
+    if (reservation.status === 0) {
+      return res.status(400).json({
+        status: "error",
+        message: "La réservation est déjà annulée.",
+      });
+    }
+
+    // Mettre à jour le statut de la réservation à Annulé
+    reservation.status = 0;
+    await reservation.save();
+
+    // Envoyer une notification à l'utilisateur
+    if (reservation.User.token) {
+      const message = {
+        notification: {
+          title: "Réservation annulée",
+          body: `Votre réservation pour le ${new Date(reservation.date).toLocaleString(
+            "fr-FR"
+          )} a été annulée avec succès.`,
+        },
+        token: reservation.User.token,
+      };
+
+      await admin
+        .messaging()
+        .send(message)
+        .then((response) => {
+          console.log("Notification d'annulation envoyée :", response);
+        })
+        .catch((error) => {
+          console.error("Erreur lors de l'envoi de la notification :", error);
+        });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Réservation annulée avec succès.",
+    });
+  } catch (error) {
+    console.error(`Erreur lors de l'annulation de la réservation : ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message:
+        "Une erreur est survenue lors de l'annulation de la réservation.",
+    });
+  }
+};
+
 module.exports = {
   create,
   login,
@@ -690,4 +798,5 @@ module.exports = {
   updatePassword,
   reservationlist,
   notification,
+  cancelReservation
 };

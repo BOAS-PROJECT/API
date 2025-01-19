@@ -21,6 +21,10 @@ router.put("/update-password", userController.updatePassword);
 // LISTE DES RESERVATIONS
 router.get("/reservation-list", userController.reservationlist);
 
+// ANNULATION D'UN RESERVATION
+router.post("/cancel-reservation", userController.cancelReservation);
+
+// NOTIFICATION
 router.post("/notification", userController.notification);
 
 module.exports = router;
