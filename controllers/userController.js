@@ -618,12 +618,21 @@ const reservationlist = async (req, res) => {
         minute: "2-digit",
       });
 
+      let statusText = "Inconnu";
+      if (reservation.status === 0) {
+        statusText = "Annulé";
+      } else if (reservation.status === 1) {
+        statusText = "En attente";
+      } else if (reservation.status === 2) {
+        statusText = "Confirmé";
+      }
+
       return {
         type,
         date: formattedDate,
         amount: reservation.amount,
         description: reservation.type,
-        status: reservation.status === 1 ? "En attente" : "Confirmé",
+        status: statusText,
       };
     });
 
