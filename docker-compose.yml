@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: boas-api
+    restart: always
+    ports:
+      - "4880:4880" # Expose votre API sur le port 3000
+    volumes:
+      - ./logs:/app/logs         # Persister les logs sur le serveur
+      - /root/API/Public:/app/public # Mapper le dossier public sur le serveur physique
+      - ./node_modules:/app/node_modules # Si besoin d'accélérer le développement
+    environment:
+      NODE_ENV: production # Assurez-vous d'utiliser l'environnement production
+    env_file:
+      - .env # Charger les variables d'environnement
