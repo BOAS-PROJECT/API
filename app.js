@@ -1,3 +1,6 @@
+require("./instrument.js");
+
+const Sentry = require("@sentry/node");
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -121,8 +124,6 @@ app.use(
 );
 */
 
-
-
 // Routes
 app.use("/api/v1/user", createUploadsUsersFolder, userRoutes);
 app.use('/api/v1/driver', createUploadsDriverFolder,  driverRoutes);
@@ -135,6 +136,9 @@ app.use('/api/v1/property', createUploadsPropertiesFolder, propertyRoutes);
 app.use('/api/v1/tourism', createTourismPropertiesFolder, tourismeRoutes);
 app.use('/api/v1/leisure', leisureRoutes);
 app.use('/api/v1/city', cityRoutes);
+
+// Sentry
+Sentry.setupExpressErrorHandler(app);
 
 // Export app
 const port = process.env.PORT || 3000;
