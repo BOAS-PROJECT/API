@@ -3,7 +3,7 @@ module.exports = {
     {
       name: "boas-api",
       script: "./app.js",
-      instances: "max", // Utilise tous les cœurs disponibles
+      instances: "2", // Utilise tous les cœurs disponibles
       exec_mode: "cluster", // Mode cluster pour utiliser plusieurs instances
       env: {
         NODE_ENV: "production",
