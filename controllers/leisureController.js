@@ -22,7 +22,6 @@ const list = async (req, res) => {
             title: leisure.title,
             description: leisure.description,
             address: leisure.address,
-            details: leisure.details,
             image: leisure.image,
             images: leisure.LeisureImages.map((image) => {
                 return {
