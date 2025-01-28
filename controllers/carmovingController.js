@@ -172,6 +172,7 @@ const list = async (req, res) => {
       price: car.price,
       priceHandling: car.priceHandling,
       licensePlate: car.licensePlate,
+      description: car.description,
       type: car.type,
     }));
 
