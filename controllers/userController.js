@@ -522,7 +522,7 @@ const reservationlist = async (req, res) => {
       include: [
         {
           model: Reservation,
-          attributes: ["id", "status", "amount", "date", "type"],
+          attributes: ["id", "status", "amount", "date", "type", "days"],
           include: [
             {
               model: Car,
@@ -590,9 +590,9 @@ const reservationlist = async (req, res) => {
 
       if (reservation.Car) {
         if (reservation.carId && reservation.driverId) {
-          type = "Réservation de Taxi (véhicule avec chauffeur)";
+          type = "Réservation de Taxi (véhicule avec chauffeur) d'une durée de " + reservation.days + " jours";
         } else if (reservation.carId && !reservation.driverId) {
-          type = "Réservation de Véhicule sans chauffeur";
+          type = "Réservation de Véhicule sans chauffeur d'une durée de " + reservation.days + " jours";
         } else {
           type = "Réservation de Taxi";
         }
@@ -605,7 +605,7 @@ const reservationlist = async (req, res) => {
       } else if (reservation.Leisure) {
         type = "Réservation de Loisirs";
       } else if (reservation.CarMoving) {
-        type = "Réservation véhicule de déménagement";
+        type = "Réservation véhicule de déménagement d'une durée de " + reservation.days + " jours";
       } else if (reservation.Property) {
         type = "Réservation logement";
       }
