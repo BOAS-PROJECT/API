@@ -160,7 +160,6 @@ const create = async (req, res) => {
   }
 };
 
-
 const login = async (req, res) => {
   try {
     const { phone, password } = req.body;
@@ -619,8 +618,6 @@ const reservationlist = async (req, res) => {
         day: "2-digit",
         month: "long",
         year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
       });
 
       let statusText = "Inconnu";
