@@ -23,6 +23,9 @@ const create = async (req, res) => {
     const photo = req.file; // Peut être undefined si aucune photo n'est envoyée
     const { firstname, lastname, genre, city, email, phone, password } = req.body;
 
+    // Normalisation de l'email (convertit les chaînes vides en null)
+    const processedEmail = email ? email.trim() : null;
+
     // Vérifications des champs obligatoires
     if (!firstname) {
       return res.status(400).json({
@@ -76,13 +79,15 @@ const create = async (req, res) => {
       });
     }
 
-    const existingEmail = await User.findOne({ where: { email } });
-    if (existingEmail) {
-      return res.status(400).json({
-        status: "error",
-        message:
-          "Un compte existe déjà pour cet email, veuillez vous connecter ou choisir un autre email.",
-      });
+    // Vérification doublon email SEULEMENT si email fourni
+    if (processedEmail) {
+      const existingEmail = await User.findOne({ where: { email: processedEmail } });
+      if (existingEmail) {
+        return res.status(400).json({
+          status: "error",
+          message: "Un compte existe déjà pour cet email.",
+        });
+      }
     }
 
     // Gestion des images (si une photo est fournie)

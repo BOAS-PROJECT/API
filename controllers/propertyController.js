@@ -164,7 +164,14 @@ const create = async (req, res) => {
 
 const createOwner = async (req, res) => {
   try {
-    const { name, phone, email, address } = req.body;
+    const { cityId ,name, phone, email, address } = req.body;
+
+    if (!cityId) {
+      return res.status(400).json({
+        status: "error",
+        message: "La ville est obligatoire.",
+      });
+    }
 
     if (!name) {
       return res.status(400).json({
@@ -187,6 +194,14 @@ const createOwner = async (req, res) => {
       });
     }
 
+    const existingCity = await City.findOne({ where: { id: cityId } });
+    if (!existingCity) {
+      return res.status(400).json({
+        status: "error",
+        message: "La ville n'existe pas.",
+      });
+    }
+
     const existingOwner = await OwnerProperty.findOne({
       where: { name, phone },
     });
@@ -198,7 +213,7 @@ const createOwner = async (req, res) => {
       });
     }
 
-    await OwnerProperty.create({ name, phone, email, address });
+    await OwnerProperty.create({ cityId ,name, phone, email, address });
     return res.status(201).json({
       status: "success",
       message: "Le proprietaire a ete cree avec succes.",
