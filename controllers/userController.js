@@ -527,6 +527,7 @@ const reservationlist = async (req, res) => {
         {
           model: Reservation,
           attributes: ["id", "status", "amount", "date", "type", "days"],
+          order: [["createdAt", "DESC"]],
           where: { isShow: true },
           include: [
             {
