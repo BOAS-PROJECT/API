@@ -630,6 +630,7 @@ const reservationlist = async (req, res) => {
       }
 
       return {
+        id: reservation.id,
         type,
         date: formattedDate,
         amount: reservation.amount,
