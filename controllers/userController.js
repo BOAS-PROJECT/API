@@ -484,174 +484,85 @@ const updatePassword = async (req, res) => {
   }
 };
 
+const formatDate = (dateString) => 
+  new Date(dateString).toLocaleDateString('fr-FR', { 
+    day: '2-digit', 
+    month: 'long', 
+    year: 'numeric' 
+  });
+
+const STATUS_MAP = {
+  0: 'Annulé',
+  1: 'En attente',
+  2: 'Confirmé'
+};
+
+const RESERVATION_TYPES = {
+  Car: (res) => {
+    if (res.driverId) return `Véhicule avec chauffeur (${res.days} jours)`;
+    if (res.carId) return `Véhicule sans chauffeur (${res.days} jours)`;
+    return 'Taxi';
+  },
+  Driver: () => 'Chauffeur',
+  Pharmacy: () => 'Pharmacie',
+  Tourism: () => 'Tourisme',
+  Leisure: () => 'Loisirs',
+  CarMoving: (res) => `Déménagement (${res.days} jours)`,
+  Property: () => 'Logement'
+};
+
+// Contrôleur principal
 const reservationlist = async (req, res) => {
   try {
-    const token = req.headers.authorization;
-
-    if (!token) {
-      return res
-        .status(401)
-        .json({ status: "error", message: "Token non fourni." });
-    }
-
-    // Vérifie si l'en-tête commence par "Bearer "
-    if (!token.startsWith("Bearer ")) {
-      return res.status(401).json({
-        status: "error",
-        message: "Format de token invalide.",
-      });
-    }
-
-    // Extrait le token en supprimant le préfixe "Bearer "
-    const customToken = token.substring(7);
-    let decodedToken;
-
-    try {
-      decodedToken = jwt.verify(customToken, process.env.JWT_SECRET);
-    } catch (error) {
-      if (error.name === "TokenExpiredError") {
-        return res
-          .status(401)
-          .json({ status: "error", message: "Votre session a expiré." });
-      }
-      return res
-        .status(401)
-        .json({ status: "error", message: "Token invalide." });
-    }
-
-    const userId = decodedToken.id;
-
-    const user = await User.findByPk(userId, {
-      order: [["createdAt", "DESC"]],
+    // Récupération des réservations avec eager loading optimisé
+    const reservations = await Reservation.findAll({
+      where: { 
+        userId: req.userId,
+        isShow: true 
+      },
+      order: [['createdAt', 'DESC']],
       include: [
-        {
-          model: Reservation,
-          attributes: ["id", "status", "amount", "date", "type", "days"],
-          order: [["createdAt", "DESC"]],
-          where: { isShow: true },
-          include: [
-            {
-              model: Car,
-              attributes: [
-                "name",
-                "image",
-                "priceWithoutDriver",
-                "priceWithDriver",
-                "licensePlate",
-              ],
-              required: false,
-            },
-            {
-              model: Driver,
-              attributes: [
-                "firstName",
-                "lastName",
-                "maritalStatus",
-                "numberPlate",
-                "phone",
-                "photo",
-              ],
-              required: false,
-            },
-            {
-              model: Pharmacy,
-              attributes: ["name", "address"],
-              required: false,
-            },
-            {
-              model: Tourism,
-              attributes: ["title", "descriptions", "image"],
-              required: false,
-            },
-            {
-              model: Leisure,
-              attributes: ["title", "description"],
-              required: false,
-            },
-            {
-              model: CarMoving,
-              attributes: ["name", "image", "price", "licensePlate"],
-              required: false,
-            },
-            {
-              model: Property,
-              attributes: ["title", "image", "price"],
-              required: false,
-            }
-          ],
-        },
-      ],
+        { model: Car, attributes: ['id', 'name', 'licensePlate'] },
+        { model: Driver, attributes: ['id', 'firstName', 'lastName'] },
+        { model: Pharmacy, attributes: ['id', 'name'] },
+        { model: Tourism, attributes: ['id', 'title'] },
+        { model: Leisure, attributes: ['id', 'title'] },
+        { model: CarMoving, attributes: ['id', 'name', 'licensePlate'] },
+        { model: Property, attributes: ['id', 'title'] }
+      ]
     });
 
-    if (!user) {
+    if (!reservations.length) {
       return res.status(404).json({
         status: "error",
-        message:
-          "Compte non trouvé. Veuillez réessayer ou en créer un nouveau.",
+        message: "Aucune réservation trouvée"
       });
     }
 
-    const formattedReservations = user.Reservations.map((reservation) => {
-      let type = null;
-
-      if (reservation.Car) {
-        if (reservation.carId && reservation.driverId) {
-          type = "Réservation de Taxi (véhicule avec chauffeur) d'une durée de " + reservation.days + " jours";
-        } else if (reservation.carId && !reservation.driverId) {
-          type = "Réservation de Véhicule sans chauffeur d'une durée de " + reservation.days + " jours";
-        } else {
-          type = "Réservation de Taxi";
-        }
-      } else if (reservation.Driver) {
-        type = "Réservation de Chauffeur";
-      } else if (reservation.Pharmacy) {
-        type = "Réservation de Pharmacie";
-      } else if (reservation.Tourism) {
-        type = "Réservation de Tourisme";
-      } else if (reservation.Leisure) {
-        type = "Réservation de Loisirs";
-      } else if (reservation.CarMoving) {
-        type = "Réservation véhicule de déménagement d'une durée de " + reservation.days + " jours";
-      } else if (reservation.Property) {
-        type = "Réservation logement";
-      }
-
-      const formattedDate = new Date(reservation.date).toLocaleString("fr-FR", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      });
-
-      let statusText = "Inconnu";
-      if (reservation.status === 0) {
-        statusText = "Annulé";
-      } else if (reservation.status === 1) {
-        statusText = "En attente";
-      } else if (reservation.status === 2) {
-        statusText = "Confirmé";
-      }
+    // Transformation des données
+    const formattedData = reservations.map(reservation => {
+      const typeKey = Object.keys(RESERVATION_TYPES).find(key => reservation[key]);
+      const type = typeKey 
+        ? RESERVATION_TYPES[typeKey](reservation)
+        : 'Type inconnu';
 
       return {
         id: reservation.id,
         type,
-        date: formattedDate,
+        date: formatDate(reservation.date),
         amount: reservation.amount,
         description: reservation.type,
-        status: statusText,
+        status: STATUS_MAP[reservation.status] || 'Inconnu'
       };
     });
 
-    return res.status(200).json({
-      status: "success",
-      data: formattedReservations,
-    });
+    res.json({ status: "success", data: formattedData });
+
   } catch (error) {
-    console.error(`ERROR LIST RESERVATION: ${error}`);
-    appendErrorLog(`ERROR LIST RESERVATION: ${error}`);
-    return res.status(500).json({
+    console.error(`[RESERVATION] Error: ${error.message}`);
+    res.status(500).json({
       status: "error",
-      message:
-        "Une erreur s'est produite lors de la récupération des réservations.",
+      message: "Échec de la récupération des réservations"
     });
   }
 };
