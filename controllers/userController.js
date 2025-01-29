@@ -731,7 +731,7 @@ const cancelReservation = async (req, res) => {
       include: [
         {
           model: User,
-          attributes: ["name", "token"], // Pour la notification
+          attributes: ["firstname", "lastname", "token"], // Pour la notification
         },
       ],
     });
@@ -760,7 +760,7 @@ const cancelReservation = async (req, res) => {
       const message = {
         notification: {
           title: "Réservation annulée",
-          body: `Votre réservation pour le ${new Date(reservation.date).toLocaleString(
+          body: `Votre réservation en date du ${new Date(reservation.date).toLocaleString(
             "fr-FR"
           )} a été annulée avec succès.`,
         },
@@ -780,7 +780,7 @@ const cancelReservation = async (req, res) => {
 
     return res.status(200).json({
       status: "success",
-      message: "Réservation annulée avec succès.",
+      message: "Votre réservation a été annulée avec succès.",
     });
   } catch (error) {
     console.error(`Erreur lors de l'annulation de la réservation : ${error}`);
