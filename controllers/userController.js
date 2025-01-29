@@ -868,7 +868,7 @@ const deleteReservation = async (req, res) => {
     }
 
      // Vérifier si la réservation est déjà annulée
-     if (reservation.status === 0) {
+     if (reservation.isShow === false) {
       return res.status(400).json({
         status: "error",
         message: "La réservation est déjà annulée.",
