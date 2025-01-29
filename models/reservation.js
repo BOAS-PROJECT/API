@@ -38,7 +38,8 @@ module.exports = (sequelize, DataTypes) => {
     type: DataTypes.INTEGER,
     amount: DataTypes.DOUBLE,
     days: DataTypes.INTEGER,
-    date: DataTypes.STRING
+    date: DataTypes.STRING,
+    isShow: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'Reservation',

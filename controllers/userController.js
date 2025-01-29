@@ -527,6 +527,7 @@ const reservationlist = async (req, res) => {
         {
           model: Reservation,
           attributes: ["id", "status", "amount", "date", "type", "days"],
+          where: { isShow: true },
           include: [
             {
               model: Car,
