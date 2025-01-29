@@ -24,6 +24,9 @@ router.get("/reservation-list", userController.reservationlist);
 // ANNULATION D'UN RESERVATION
 router.post("/cancel-reservation", userController.cancelReservation);
 
+// SUPPRESSION D'UN RESERVATION
+router.post("/delete-reservation", userController.deleteReservation);
+
 // NOTIFICATION
 router.post("/notification", userController.notification);
 

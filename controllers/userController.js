@@ -639,7 +639,7 @@ const reservationlist = async (req, res) => {
       if (reservation.status === 0) {
         statusText = "Annulé";
       } else if (reservation.status === 1) {
-        statusText = "En attente";
+        statusText = "En attente de validation";
       } else if (reservation.status === 2) {
         statusText = "Confirmé";
       }
@@ -702,7 +702,7 @@ const notification = async (req, res) => {
 
 const cancelReservation = async (req, res) => {
   try {
-    const { reservationId } = req.body; // ID de la réservation à annuler
+    const { reservationId } = req.body;
     const token = req.headers.authorization;
 
     if (!token) {
@@ -742,12 +742,12 @@ const cancelReservation = async (req, res) => {
     const reservation = await Reservation.findOne({
       where: {
         id: reservationId,
-        userId: userId, // Assure que la réservation appartient au bon utilisateur
+        userId: userId,
       },
       include: [
         {
           model: User,
-          attributes: ["firstname", "lastname", "token"], // Pour la notification
+          attributes: ["firstname", "lastname", "token"],
         },
       ],
     });
@@ -808,6 +808,112 @@ const cancelReservation = async (req, res) => {
   }
 };
 
+const deleteReservation = async (req, res) => {
+  try {
+    const { reservationId } = req.body;
+    const token = req.headers.authorization;
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token non fourni." });
+    }
+
+    // Vérifie si l'en-tête commence par "Bearer "
+    if (!token.startsWith("Bearer ")) {
+      return res.status(401).json({
+        status: "error",
+        message: "Format de token invalide.",
+      });
+    }
+
+    // Extrait le token en supprimant le préfixe "Bearer "
+    const customToken = token.substring(7);
+    let decodedToken;
+
+    try {
+      decodedToken = jwt.verify(customToken, process.env.JWT_SECRET);
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .json({ status: "error", message: "Votre session a expiré." });
+      }
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token invalide." });
+    }
+
+    const userId = decodedToken.id;
+
+    // Vérifier si la réservation existe et appartient à l'utilisateur
+    const reservation = await Reservation.findOne({
+      where: {
+        id: reservationId,
+        userId: userId,
+      },
+      include: [
+        {
+          model: User,
+          attributes: ["firstname", "lastname", "token"],
+        },
+      ],
+    });
+
+    if (!reservation) {
+      return res.status(404).json({
+        status: "error",
+        message: "Réservation non trouvée ou n'appartient pas à l'utilisateur.",
+      });
+    }
+
+     // Vérifier si la réservation est déjà annulée
+     if (reservation.status === 0) {
+      return res.status(400).json({
+        status: "error",
+        message: "La réservation est déjà annulée.",
+      });
+    }
+
+    // Annuler la réservation
+    reservation.isShow = false;
+    await reservation.save();
+
+    // Envoyer une notification à l'utilisateur
+    if (reservation.User.token) {
+      const message = {
+        notification: {
+          title: "Réservation supprimée",
+          body: `Votre réservation a été supprimée avec succès.`,
+        },
+        token: reservation.User.token,
+      };
+
+      await admin
+        .messaging()
+        .send(message)
+        .then((response) => {
+          console.log("Notification d'annulation envoyée :", response);
+        })
+        .catch((error) => {
+          console.error("Erreur lors de l'envoi de la notification :", error);
+        });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Votre réservation a bien ete supprimée avec succès.",
+    });
+  } catch (error) {
+    console.error(`Erreur lors de la suppression de la réservation : ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message:
+        "Une erreur est survenue lors de la suppression de la réservation.",
+    });
+  }
+}
+
 module.exports = {
   create,
   login,
@@ -816,5 +922,6 @@ module.exports = {
   updatePassword,
   reservationlist,
   notification,
-  cancelReservation
+  cancelReservation,
+  deleteReservation
 };
