@@ -596,27 +596,37 @@ const reservationlist = async (req, res) => {
 
     const formattedReservations = reservations.map((reservation) => {
       let type = null;
+      let description = null;
 
       if (reservation.Car) {
         if (reservation.carId && reservation.driverId) {
-          type = "Réservation de Taxi (véhicule avec chauffeur) d'une durée de " + reservation.days + " jours";
+          type = "Réservation de véhicule (véhicule avec chauffeur)";
+          description = "Réservation d'une durée de " + reservation.days + " jours";
         } else if (reservation.carId && !reservation.driverId) {
-          type = "Réservation de Véhicule sans chauffeur d'une durée de " + reservation.days + " jours";
+          type = "Réservation de véhicule sans chauffeur";
+          description = "Réservation d'une durée de " + reservation.days + " jours";
         } else {
-          type = "Réservation de Taxi";
+          type = "Taxi";
+          description = "Réservation d'un taxi";
         }
       } else if (reservation.Driver) {
-        type = "Réservation de Chauffeur";
+        type = "Chauffeur";
+        description = "Réservation d'une durée de " + reservation.days + " jours";
       } else if (reservation.Pharmacy) {
-        type = "Réservation de Pharmacie";
+        type = "Pharmacie";
+        description = "Réservation d'un véhicule vers la pharmacie";
       } else if (reservation.Tourism) {
-        type = "Réservation de Tourisme";
+        type = "Site touristique";
+        description = "Réservation d'un site touristique";
       } else if (reservation.Leisure) {
-        type = "Réservation de Loisirs";
+        type = "Loisirs";
+        description = "Réservation d'un lieu de loisir";
       } else if (reservation.CarMoving) {
-        type = "Réservation véhicule de déménagement d'une durée de " + reservation.days + " jours";
+        type = "Véhicule de déménagement";
+        description = "Réservation d'un véhicule de déménagement d'une durée de " + reservation.days + " jours";
       } else if (reservation.Property) {
-        type = "Réservation logement";
+        type = "Logement";
+        description = "Réservation d'un logement";
       }
 
       const formattedDate = new Date(reservation.date).toLocaleString("fr-FR", {
@@ -639,7 +649,7 @@ const reservationlist = async (req, res) => {
         type,
         date: formattedDate,
         amount: reservation.amount,
-        description: reservation.type,
+        description: description,
         status: statusText,
       };
     });
