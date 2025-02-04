@@ -494,7 +494,6 @@ const reservationlist = async (req, res) => {
         .json({ status: "error", message: "Token non fourni." });
     }
 
-    // Vérifie si l'en-tête commence par "Bearer "
     if (!token.startsWith("Bearer ")) {
       return res.status(401).json({
         status: "error",
@@ -502,7 +501,6 @@ const reservationlist = async (req, res) => {
       });
     }
 
-    // Extrait le token en supprimant le préfixe "Bearer "
     const customToken = token.substring(7);
     let decodedToken;
 
@@ -520,13 +518,13 @@ const reservationlist = async (req, res) => {
     }
 
     const userId = decodedToken.id;
-
     const user = await User.findByPk(userId);
+
     if (!user) {
       return res.status(404).json({
         status: "error",
         message:
-          "Compte non trouvé. Veuillez réessayer ou en cree un nouveau.",
+          "Compte non trouvé. Veuillez réessayer ou en créer un nouveau.",
       });
     }
 
@@ -543,18 +541,6 @@ const reservationlist = async (req, res) => {
             "priceWithoutDriver",
             "priceWithDriver",
             "licensePlate",
-          ],
-          required: false,
-        },
-        {
-          model: Driver,
-          attributes: [
-            "firstName",
-            "lastName",
-            "maritalStatus",
-            "numberPlate",
-            "phone",
-            "photo",
           ],
           required: false,
         },
@@ -586,47 +572,79 @@ const reservationlist = async (req, res) => {
       ],
     });
 
-    if (!user) {
-      return res.status(404).json({
-        status: "error",
-        message:
-          "Compte non trouvé. Veuillez réessayer ou en créer un nouveau.",
-      });
-    }
-
     const formattedReservations = reservations.map((reservation) => {
       let type = null;
       let description = null;
+      let details = {};
 
       if (reservation.Car) {
-        if (reservation.carId && reservation.driverId) {
-          type = "Réservation de véhicule (véhicule avec chauffeur)";
-          description = "Réservation d'une durée de " + reservation.days + " jours";
-        } else if (reservation.carId && !reservation.driverId) {
-          type = "Réservation de véhicule sans chauffeur";
-          description = "Réservation d'une durée de " + reservation.days + " jours";
-        } else {
-          type = "Taxi";
-          description = "Réservation d'un taxi";
-        }
-      } else if (reservation.Driver) {
-        type = "Chauffeur";
-        description = "Réservation d'une durée de " + reservation.days + " jours";
-      } else if (reservation.Pharmacy) {
-        type = "Pharmacie";
-        description = "Réservation d'un véhicule vers la pharmacie";
-      } else if (reservation.Tourism) {
-        type = "Site touristique";
-        description = "Réservation d'un site touristique";
-      } else if (reservation.Leisure) {
-        type = "Loisirs";
-        description = "Réservation d'un lieu de loisir";
+        type = reservation.type === 1 
+          ? "Réservation de véhicule sans chauffeur" 
+          : "Réservation de véhicule avec chauffeur";
+        description = `Réservation d'une durée de ${reservation.days} jours`;
+        details = {
+          nom: reservation.Car.name,
+          image: reservation.Car.image,
+          prix: reservation.type === 1 
+            ? reservation.Car.priceWithoutDriver 
+            : reservation.Car.priceWithDriver,
+          immatriculation: reservation.Car.licensePlate,
+        };
       } else if (reservation.CarMoving) {
-        type = "Véhicule de déménagement";
-        description = "Réservation d'un véhicule de déménagement d'une durée de " + reservation.days + " jours";
+        type = reservation.type === 1 
+          ? "Véhicule de déménagement sans équipe" 
+          : "Véhicule de déménagement avec équipe";
+        description = `Réservation d'un véhicule de déménagement pour ${reservation.days} jours`;
+        details = {
+          nom: reservation.CarMoving.name,
+          image: reservation.CarMoving.image,
+          prix: reservation.CarMoving.price,
+          immatriculation: reservation.CarMoving.licensePlate,
+        };
+      } else if (reservation.Pharmacy) {
+        type = reservation.type === 1 
+          ? "Location du taxi Boas vers une pharmacie" 
+          : "Location d’un véhicule vers une pharmacie";
+        description = `Réservation d'un transport vers ${reservation.Pharmacy.name}`;
+        details = {
+          nom: reservation.Pharmacy.name,
+          adresse: reservation.Pharmacy.address,
+        };
+      } else if (reservation.Tourism) {
+        type = reservation.type === 1 
+          ? `Location du taxi Boas vers ${reservation.Tourism.title}` 
+          : reservation.type === 2 
+          ? `Location du véhicule Boas sans chauffeur vers ${reservation.Tourism.title}` 
+          : `Location du véhicule Boas avec chauffeur vers ${reservation.Tourism.title}`;
+        description = `Réservation du site touristique ${reservation.Tourism.title}`;
+        details = {
+          titre: reservation.Tourism.title,
+          description: reservation.Tourism.descriptions,
+          image: reservation.Tourism.image,
+        };
+      } else if (reservation.Leisure) {
+        type = reservation.type === 1 
+          ? `Location du taxi Boas vers ${reservation.Leisure.title}` 
+          : reservation.type === 2 
+          ? `Location du véhicule Boas sans chauffeur vers ${reservation.Leisure.title}` 
+          : `Location du véhicule Boas avec chauffeur vers ${reservation.Leisure.title}`;
+        description = `Réservation d'un lieu de loisir : ${reservation.Leisure.title}`;
+        details = {
+          titre: reservation.Leisure.title,
+          description: reservation.Leisure.description,
+        };
       } else if (reservation.Property) {
-        type = "Logement";
-        description = "Réservation d'un logement";
+        type = reservation.type === 1 
+          ? `Location du taxi Boas vers ${reservation.Property.title}` 
+          : reservation.type === 2 
+          ? `Location du véhicule Boas sans chauffeur vers ${reservation.Property.title}` 
+          : `Location du véhicule Boas avec chauffeur vers ${reservation.Property.title}`;
+        description = `Réservation d'un logement : ${reservation.Property.title}`;
+        details = {
+          titre: reservation.Property.title,
+          image: reservation.Property.image,
+          prix: reservation.Property.price,
+        };
       }
 
       const formattedDate = new Date(reservation.date).toLocaleString("fr-FR", {
@@ -635,22 +653,20 @@ const reservationlist = async (req, res) => {
         year: "numeric",
       });
 
-      let statusText = "Inconnu";
-      if (reservation.status === 0) {
-        statusText = "Annulé";
-      } else if (reservation.status === 1) {
-        statusText = "En attente de validation";
-      } else if (reservation.status === 2) {
-        statusText = "Confirmé";
-      }
+      const statusText = {
+        0: "Annulé",
+        1: "En attente de validation",
+        2: "Confirmé",
+      }[reservation.status] || "Inconnu";
 
       return {
         id: reservation.id,
         type,
         date: formattedDate,
         amount: reservation.amount,
-        description: description,
+        description,
         status: statusText,
+        details,
       };
     });
 
