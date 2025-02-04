@@ -535,13 +535,7 @@ const reservationlist = async (req, res) => {
       include: [
         {
           model: Car,
-          attributes: [
-            "name",
-            "image",
-            "priceWithoutDriver",
-            "priceWithDriver",
-            "licensePlate",
-          ],
+          attributes: ["name", "image", "priceWithoutDriver", "priceWithDriver", "licensePlate"],
           required: false,
         },
         {
@@ -573,77 +567,77 @@ const reservationlist = async (req, res) => {
     });
 
     const formattedReservations = reservations.map((reservation) => {
-      let type = null;
-      let description = null;
+      let type = "";
+      let description = "";
       let details = {};
 
       if (reservation.Car) {
         type = reservation.type === 1 
-          ? "Réservation de véhicule sans chauffeur" 
-          : "Réservation de véhicule avec chauffeur";
-        description = `Réservation d'une durée de ${reservation.days} jours`;
+          ? "Location de voiture sans chauffeur" 
+          : "Location de voiture avec chauffeur";
+        description = `Votre réservation pour ${reservation.days} jour(s) est enregistrée.`;
         details = {
-          nom: reservation.Car.name,
+          véhicule: reservation.Car.name,
           image: reservation.Car.image,
-          prix: reservation.type === 1 
+          tarif: reservation.type === 1 
             ? reservation.Car.priceWithoutDriver 
             : reservation.Car.priceWithDriver,
           immatriculation: reservation.Car.licensePlate,
         };
       } else if (reservation.CarMoving) {
         type = reservation.type === 1 
-          ? "Véhicule de déménagement sans équipe" 
-          : "Véhicule de déménagement avec équipe";
-        description = `Réservation d'un véhicule de déménagement pour ${reservation.days} jours`;
+          ? "Déménagement sans équipe" 
+          : "Déménagement avec équipe";
+        description = `Votre véhicule de déménagement est réservé pour ${reservation.days} jour(s).`;
         details = {
-          nom: reservation.CarMoving.name,
+          véhicule: reservation.CarMoving.name,
           image: reservation.CarMoving.image,
-          prix: reservation.CarMoving.price,
+          tarif: reservation.CarMoving.price,
           immatriculation: reservation.CarMoving.licensePlate,
         };
       } else if (reservation.Pharmacy) {
         type = reservation.type === 1 
-          ? "Location du taxi Boas vers une pharmacie" 
-          : "Location d’un véhicule vers une pharmacie";
-        description = `Réservation d'un transport vers ${reservation.Pharmacy.name}`;
+          ? "Transport en taxi vers une pharmacie" 
+          : "Location de véhicule vers une pharmacie";
+        description = `Votre transport vers ${reservation.Pharmacy.name} est confirmé.`;
         details = {
-          nom: reservation.Pharmacy.name,
+          pharmacie: reservation.Pharmacy.name,
           adresse: reservation.Pharmacy.address,
         };
       } else if (reservation.Tourism) {
         type = reservation.type === 1 
-          ? `Location du taxi Boas vers ${reservation.Tourism.title}` 
+          ? `Transport en taxi vers ${reservation.Tourism.title}` 
           : reservation.type === 2 
-          ? `Location du véhicule Boas sans chauffeur vers ${reservation.Tourism.title}` 
-          : `Location du véhicule Boas avec chauffeur vers ${reservation.Tourism.title}`;
-        description = `Réservation du site touristique ${reservation.Tourism.title}`;
+          ? `Location de véhicule sans chauffeur vers ${reservation.Tourism.title}` 
+          : `Location de véhicule avec chauffeur vers ${reservation.Tourism.title}`;
+        description = `Votre visite à ${reservation.Tourism.title} est programmée !`;
         details = {
-          titre: reservation.Tourism.title,
+          site: reservation.Tourism.title,
           description: reservation.Tourism.descriptions,
           image: reservation.Tourism.image,
         };
       } else if (reservation.Leisure) {
         type = reservation.type === 1 
-          ? `Location du taxi Boas vers ${reservation.Leisure.title}` 
+          ? `Transport en taxi vers ${reservation.Leisure.title}` 
           : reservation.type === 2 
-          ? `Location du véhicule Boas sans chauffeur vers ${reservation.Leisure.title}` 
-          : `Location du véhicule Boas avec chauffeur vers ${reservation.Leisure.title}`;
-        description = `Réservation d'un lieu de loisir : ${reservation.Leisure.title}`;
+          ? `Location de véhicule sans chauffeur vers ${reservation.Leisure.title}` 
+          : `Location de véhicule avec chauffeur vers ${reservation.Leisure.title}`;
+        description = `Profitez de votre moment de détente à ${reservation.Leisure.title} !`;
         details = {
-          titre: reservation.Leisure.title,
+          lieu: reservation.Leisure.title,
           description: reservation.Leisure.description,
         };
       } else if (reservation.Property) {
         type = reservation.type === 1 
-          ? `Location du taxi Boas vers ${reservation.Property.title}` 
+          ? `Transport en taxi vers ${reservation.Property.title}` 
           : reservation.type === 2 
-          ? `Location du véhicule Boas sans chauffeur vers ${reservation.Property.title}` 
-          : `Location du véhicule Boas avec chauffeur vers ${reservation.Property.title}`;
-        description = `Réservation d'un logement : ${reservation.Property.title}`;
+          ? `Location de véhicule sans chauffeur vers ${reservation.Property.title}` 
+          : `Location de véhicule avec chauffeur vers ${reservation.Property.title}`;
+        description = `Votre réservation pour ${reservation.Property.title} est confirmée.`;
         details = {
-          titre: reservation.Property.title,
+          logement: reservation.Property.title,
           image: reservation.Property.image,
-          prix: reservation.Property.price,
+          tarif: reservation.Property.price,
         };
       }
 
@@ -654,19 +648,19 @@ const reservationlist = async (req, res) => {
       });
 
       const statusText = {
-        0: "Annulé",
+        0: "Annulée",
         1: "En attente de validation",
-        2: "Confirmé",
-      }[reservation.status] || "Inconnu";
-
+        2: "Confirmée",
+      }[reservation.status] || "Statut inconnu";
+      
       return {
         id: reservation.id,
         type,
         date: formattedDate,
-        amount: reservation.amount,
+        montant: reservation.amount,
         description,
-        status: statusText,
-        details,
+        statut: statusText,
+        détails: details,
       };
     });
 
