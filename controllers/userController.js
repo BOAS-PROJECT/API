@@ -487,7 +487,6 @@ const updatePassword = async (req, res) => {
 const reservationlist = async (req, res) => {
   try {
     const token = req.headers.authorization;
-
     if (!token) {
       return res
         .status(401)
@@ -570,12 +569,14 @@ const reservationlist = async (req, res) => {
       let type = "";
       let description = "";
       let details = {};
+      let status = "";
 
       if (reservation.Car) {
         type = reservation.type === 1 
-          ? "Location de voiture sans chauffeur" 
-          : "Location de voiture avec chauffeur";
+          ? "Location de véhicule sans chauffeur" 
+          : "Location de véhicule avec chauffeur";
         description = `Votre réservation pour ${reservation.days} jour(s) est enregistrée.`;
+        status = reservation.status;
         details = {
           véhicule: reservation.Car.name,
           image: reservation.Car.image,
@@ -586,9 +587,10 @@ const reservationlist = async (req, res) => {
         };
       } else if (reservation.CarMoving) {
         type = reservation.type === 1 
-          ? "Déménagement sans équipe" 
-          : "Déménagement avec équipe";
+          ? "Véhicule de déménagement sans équipe" 
+          : "Véhicule de déménagement avec équipe";
         description = `Votre véhicule de déménagement est réservé pour ${reservation.days} jour(s).`;
+        status = reservation.status;
         details = {
           véhicule: reservation.CarMoving.name,
           image: reservation.CarMoving.image,
@@ -600,6 +602,7 @@ const reservationlist = async (req, res) => {
           ? "Transport en taxi vers une pharmacie" 
           : "Location de véhicule vers une pharmacie";
         description = `Votre transport vers ${reservation.Pharmacy.name} est confirmé.`;
+        status = reservation.status;
         details = {
           pharmacie: reservation.Pharmacy.name,
           adresse: reservation.Pharmacy.address,
@@ -611,6 +614,7 @@ const reservationlist = async (req, res) => {
           ? `Location de véhicule sans chauffeur vers ${reservation.Tourism.title}` 
           : `Location de véhicule avec chauffeur vers ${reservation.Tourism.title}`;
         description = `Votre visite à ${reservation.Tourism.title} est programmée !`;
+        status = reservation.status;
         details = {
           site: reservation.Tourism.title,
           description: reservation.Tourism.descriptions,
@@ -623,6 +627,7 @@ const reservationlist = async (req, res) => {
           ? `Location de véhicule sans chauffeur vers ${reservation.Leisure.title}` 
           : `Location de véhicule avec chauffeur vers ${reservation.Leisure.title}`;
         description = `Profitez de votre moment de détente à ${reservation.Leisure.title} !`;
+        status = reservation.status;
         details = {
           lieu: reservation.Leisure.title,
           description: reservation.Leisure.description,
@@ -634,6 +639,7 @@ const reservationlist = async (req, res) => {
           ? `Location de véhicule sans chauffeur vers ${reservation.Property.title}` 
           : `Location de véhicule avec chauffeur vers ${reservation.Property.title}`;
         description = `Votre réservation pour ${reservation.Property.title} est confirmée.`;
+        status = reservation.status;
         details = {
           logement: reservation.Property.title,
           image: reservation.Property.image,
@@ -647,11 +653,15 @@ const reservationlist = async (req, res) => {
         year: "numeric",
       });
 
-      const statusText = {
-        0: "Annulée",
-        1: "En attente de validation",
-        2: "Confirmée",
-      }[reservation.status] || "Statut inconnu";
+      let statusText = "";
+
+      if (status === 1) {
+        statusText = "En attente de validation";
+      } else if (status === 0) {
+        statusText = "Annulé";
+      } else if (status === 2) {
+        statusText = "Confirmée";
+      }
       
       return {
         id: reservation.id,
