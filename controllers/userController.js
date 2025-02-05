@@ -570,6 +570,7 @@ const reservationlist = async (req, res) => {
       let description = "";
       let details = {};
       let status = "";
+      let state = "";
 
       if (reservation.Car) {
         type = reservation.type === 1 
@@ -577,6 +578,7 @@ const reservationlist = async (req, res) => {
           : "Location de véhicule avec chauffeur";
         description = `Votre réservation pour ${reservation.days} jour(s) est enregistrée.`;
         status = reservation.status;
+        state = 1;
         details = {
           véhicule: reservation.Car.name,
           image: reservation.Car.image,
@@ -591,6 +593,7 @@ const reservationlist = async (req, res) => {
           : "Véhicule de déménagement avec équipe";
         description = `Votre véhicule de déménagement est réservé pour ${reservation.days} jour(s).`;
         status = reservation.status;
+        state = 2;
         details = {
           véhicule: reservation.CarMoving.name,
           image: reservation.CarMoving.image,
@@ -603,6 +606,7 @@ const reservationlist = async (req, res) => {
           : "Location de véhicule vers une pharmacie";
         description = `Votre transport vers ${reservation.Pharmacy.name} est confirmé.`;
         status = reservation.status;
+        state = 3;
         details = {
           pharmacie: reservation.Pharmacy.name,
           adresse: reservation.Pharmacy.address,
@@ -614,6 +618,7 @@ const reservationlist = async (req, res) => {
           ? `Location de véhicule sans chauffeur vers ${reservation.Tourism.title}` 
           : `Location de véhicule avec chauffeur vers ${reservation.Tourism.title}`;
         description = `Votre visite à ${reservation.Tourism.title} est programmée !`;
+        state = 4;
         status = reservation.status;
         details = {
           site: reservation.Tourism.title,
@@ -627,6 +632,7 @@ const reservationlist = async (req, res) => {
           ? `Location de véhicule sans chauffeur vers ${reservation.Leisure.title}` 
           : `Location de véhicule avec chauffeur vers ${reservation.Leisure.title}`;
         description = `Profitez de votre moment de détente à ${reservation.Leisure.title} !`;
+        state = 5;
         status = reservation.status;
         details = {
           lieu: reservation.Leisure.title,
@@ -639,6 +645,7 @@ const reservationlist = async (req, res) => {
           ? `Location de véhicule sans chauffeur vers ${reservation.Property.title}` 
           : `Location de véhicule avec chauffeur vers ${reservation.Property.title}`;
         description = `Votre réservation pour ${reservation.Property.title} est confirmée.`;
+        state = 6;
         status = reservation.status;
         details = {
           logement: reservation.Property.title,
@@ -670,7 +677,8 @@ const reservationlist = async (req, res) => {
         montant: reservation.amount,
         description,
         statut: statusText,
-        détails: details,
+        state,
+        détails: details
       };
     });
 
