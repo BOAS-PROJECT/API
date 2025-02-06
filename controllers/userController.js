@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const sharp = require("sharp");
 const path = require("path");
 const admin = require("firebase-admin");
+const multer = require("multer");
 const {
   User,
   Reservation,
@@ -945,6 +946,10 @@ const deleteReservation = async (req, res) => {
 
 const reservationCar = async (req, res) => {
   try {
+    console.error("Headers reçus :", req.headers);
+    console.error("Body reçu :", req.body);
+    console.error("Fichier reçu :", req.file);
+
     const token = req.headers.authorization;
     const { bookingId, carId, payment, days, date, amount, type } = req.body;
     const host = req.get("host");
