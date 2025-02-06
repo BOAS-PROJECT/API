@@ -534,32 +534,32 @@ const reservationlist = async (req, res) => {
       include: [
         {
           model: Car,
-          attributes: ["name", "image", "priceWithoutDriver", "priceWithDriver", "licensePlate"],
+          attributes: ["cityId", "name", "image", "priceWithoutDriver", "priceWithDriver", "licensePlate"],
           required: false,
         },
         {
           model: Pharmacy,
-          attributes: ["name", "address"],
+          attributes: ["cityId", "name", "address"],
           required: false,
         },
         {
           model: Tourism,
-          attributes: ["title", "descriptions", "image"],
+          attributes: ["cityId", "title", "descriptions", "image"],
           required: false,
         },
         {
           model: Leisure,
-          attributes: ["title", "description"],
+          attributes: ["cityId", "title", "description"],
           required: false,
         },
         {
           model: CarMoving,
-          attributes: ["name", "image", "price", "licensePlate"],
+          attributes: ["cityId", "name", "image", "price", "licensePlate"],
           required: false,
         },
         {
           model: Property,
-          attributes: ["title", "image", "price"],
+          attributes: ["cityId", "title", "image", "price"],
           required: false,
         }
       ],
@@ -580,6 +580,7 @@ const reservationlist = async (req, res) => {
         status = reservation.status;
         state = 1;
         details = {
+          cityId: reservation.Car.cityId,
           véhicule: reservation.Car.name,
           image: reservation.Car.image,
           tarif: reservation.type === 1 
@@ -595,6 +596,7 @@ const reservationlist = async (req, res) => {
         status = reservation.status;
         state = 2;
         details = {
+          cityId: reservation.CarMoving.cityId,
           véhicule: reservation.CarMoving.name,
           image: reservation.CarMoving.image,
           tarif: reservation.CarMoving.price,
@@ -608,6 +610,7 @@ const reservationlist = async (req, res) => {
         status = reservation.status;
         state = 3;
         details = {
+          cityId: reservation.Pharmacy.cityId,
           pharmacie: reservation.Pharmacy.name,
           adresse: reservation.Pharmacy.address,
         };
@@ -621,6 +624,7 @@ const reservationlist = async (req, res) => {
         state = 4;
         status = reservation.status;
         details = {
+          cityId: reservation.Pharmacy.cityId,
           site: reservation.Tourism.title,
           description: reservation.Tourism.descriptions,
           image: reservation.Tourism.image,
@@ -635,6 +639,7 @@ const reservationlist = async (req, res) => {
         state = 5;
         status = reservation.status;
         details = {
+          cityId: reservation.Pharmacy.cityId,
           lieu: reservation.Leisure.title,
           description: reservation.Leisure.description,
         };
@@ -648,6 +653,7 @@ const reservationlist = async (req, res) => {
         state = 6;
         status = reservation.status;
         details = {
+          cityId: reservation.Pharmacy.cityId,
           logement: reservation.Property.title,
           image: reservation.Property.image,
           tarif: reservation.Property.price,
