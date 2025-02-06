@@ -652,7 +652,7 @@ const reservationlist = async (req, res) => {
             ? "Véhicule de déménagement sans équipe"
             : "Véhicule de déménagement avec équipe";
         description = `Votre véhicule de déménagement est réservé pour ${reservation.days} jour(s).`;
-        state = state || 2;
+        state = 2;
         details = {
           cityId: reservation.CarMoving.cityId,
           véhicule: reservation.CarMoving.name,
@@ -666,7 +666,7 @@ const reservationlist = async (req, res) => {
             ? "Location de véhicule sans chauffeur"
             : "Location de véhicule avec chauffeur";
         description = `Votre réservation pour ${reservation.days} jour(s) est enregistrée.`;
-        state = state || 1;
+        state =  1;
         details = carDetails;
       }
 
