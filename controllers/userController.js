@@ -950,12 +950,6 @@ const reservationCar = async (req, res) => {
     const host = req.get("host");
     const image = req.file;
 
-    return res.status(200)
-    .json({
-      status: "success",
-      message: `${req.body}`,
-    })
-
     if(!bookingId){
       return res.status(400)
       .json({ status: "error", message: "La réservation en cours est obligatoire." });
