@@ -953,7 +953,7 @@ const reservationCar = async (req, res) => {
     return res.status(200)
     .json({
       status: "success",
-      message: req.body,
+      message: `${req.body}`,
     })
 
     if(!bookingId){
