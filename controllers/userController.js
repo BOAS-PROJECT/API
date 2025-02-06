@@ -23,7 +23,8 @@ const create = async (req, res) => {
   try {
     const host = req.get("host");
     const photo = req.file; // Peut être undefined si aucune photo n'est envoyée
-    const { firstname, lastname, genre, city, email, phone, password } = req.body;
+    const { firstname, lastname, genre, city, email, phone, password } =
+      req.body;
 
     // Normalisation de l'email (convertit les chaînes vides en null)
     const processedEmail = email ? email.trim() : null;
@@ -83,7 +84,9 @@ const create = async (req, res) => {
 
     // Vérification doublon email SEULEMENT si email fourni
     if (processedEmail) {
-      const existingEmail = await User.findOne({ where: { email: processedEmail } });
+      const existingEmail = await User.findOne({
+        where: { email: processedEmail },
+      });
       if (existingEmail) {
         return res.status(400).json({
           status: "error",
@@ -489,17 +492,10 @@ const updatePassword = async (req, res) => {
 const reservationlist = async (req, res) => {
   try {
     const token = req.headers.authorization;
-    if (!token) {
+    if (!token || !token.startsWith("Bearer ")) {
       return res
         .status(401)
-        .json({ status: "error", message: "Token non fourni." });
-    }
-
-    if (!token.startsWith("Bearer ")) {
-      return res.status(401).json({
-        status: "error",
-        message: "Format de token invalide.",
-      });
+        .json({ status: "error", message: "Token invalide ou non fourni." });
     }
 
     const customToken = token.substring(7);
@@ -508,35 +504,47 @@ const reservationlist = async (req, res) => {
     try {
       decodedToken = jwt.verify(customToken, process.env.JWT_SECRET);
     } catch (error) {
-      if (error.name === "TokenExpiredError") {
-        return res
-          .status(401)
-          .json({ status: "error", message: "Votre session a expiré." });
-      }
       return res
         .status(401)
-        .json({ status: "error", message: "Token invalide." });
+        .json({ status: "error", message: "Token invalide ou expiré." });
     }
 
     const userId = decodedToken.id;
     const user = await User.findByPk(userId);
-
     if (!user) {
-      return res.status(404).json({
-        status: "error",
-        message:
-          "Compte non trouvé. Veuillez réessayer ou en créer un nouveau.",
-      });
+      return res
+        .status(404)
+        .json({ status: "error", message: "Compte non trouvé." });
     }
 
     const reservations = await Reservation.findAll({
       where: { userId, isShow: true },
       order: [["createdAt", "DESC"]],
-      attributes: ["id", "carId", "carMovingId", "pharmacyId", "propertyId", "tourismId", "leisureId", "status", "amount", "date", "type", "days"],
+      attributes: [
+        "id",
+        "carId",
+        "carMovingId",
+        "pharmacyId",
+        "propertyId",
+        "tourismId",
+        "leisureId",
+        "status",
+        "amount",
+        "date",
+        "type",
+        "days",
+      ],
       include: [
         {
           model: Car,
-          attributes: ["cityId", "name", "image", "priceWithoutDriver", "priceWithDriver", "licensePlate"],
+          attributes: [
+            "cityId",
+            "name",
+            "image",
+            "priceWithoutDriver",
+            "priceWithDriver",
+            "licensePlate",
+          ],
           required: false,
         },
         {
@@ -563,7 +571,7 @@ const reservationlist = async (req, res) => {
           model: Property,
           attributes: ["cityId", "title", "image", "price"],
           required: false,
-        }
+        },
       ],
     });
 
@@ -573,29 +581,76 @@ const reservationlist = async (req, res) => {
       let details = {};
       let status = "";
       let state = "";
+      let carDetails = null;
 
       if (reservation.Car) {
-        type = reservation.type === 1 
-          ? "Location de véhicule sans chauffeur" 
-          : "Location de véhicule avec chauffeur";
-        description = `Votre réservation pour ${reservation.days} jour(s) est enregistrée.`;
-        status = reservation.status;
-        state = 1;
-        details = {
-          cityId: reservation.Car.cityId,
+        carDetails = {
           véhicule: reservation.Car.name,
-          image: reservation.Car.image,
-          tarif: reservation.type === 1 
-            ? reservation.Car.priceWithoutDriver 
-            : reservation.Car.priceWithDriver,
+          imageCar: reservation.Car.image,
+          tarif:
+            reservation.type === 1
+              ? reservation.Car.priceWithoutDriver
+              : reservation.Car.priceWithDriver,
           immatriculation: reservation.Car.licensePlate,
         };
+      }
+
+      if (reservation.Tourism) {
+        type = carDetails
+          ? "Réservation de visite touristique avec véhicule"
+          : "Réservation de visite touristique";
+        description = `Votre visite du site touristique ${reservation.Tourism.title} est programmée !`;
+        state = 4;
+        details = {
+          cityId: reservation.Tourism.cityId,
+          site: reservation.Tourism.title,
+          description: reservation.Tourism.descriptions,
+          image: reservation.Tourism.image,
+          ...carDetails,
+        };
+      } else if (reservation.Leisure) {
+        type = carDetails
+          ? "Réservation d'un lieu de loisirs avec véhicule"
+          : "Réservation d'un lieu de loisirs";
+        description = `Profitez de votre moment de détente à ${reservation.Leisure.title} !`;
+        state = 5;
+        details = {
+          cityId: reservation.Leisure.cityId,
+          lieu: reservation.Leisure.title,
+          description: reservation.Leisure.description,
+          ...carDetails,
+        };
+      } else if (reservation.Property) {
+        type = carDetails
+          ? "Réservation de logement avec véhicule"
+          : "Réservation de logement";
+        description = `Votre réservation pour ${reservation.Property.title} est confirmée.`;
+        state = 6;
+        details = {
+          cityId: reservation.Property.cityId,
+          logement: reservation.Property.title,
+          image: reservation.Property.image,
+          tarif: reservation.Property.price,
+          ...carDetails,
+        };
+      } else if (reservation.Pharmacy) {
+        type = carDetails
+          ? "Transport en taxi vers une pharmacie avec véhicule"
+          : "Transport en taxi vers une pharmacie";
+        description = `Votre transport vers ${reservation.Pharmacy.name} est confirmé.`;
+        state = 3;
+        details = {
+          cityId: reservation.Pharmacy.cityId,
+          pharmacie: reservation.Pharmacy.name,
+          adresse: reservation.Pharmacy.address,
+          ...carDetails,
+        };
       } else if (reservation.CarMoving) {
-        type = reservation.type === 1 
-          ? "Véhicule de déménagement sans équipe" 
-          : "Véhicule de déménagement avec équipe";
+        type =
+          reservation.type === 1
+            ? "Véhicule de déménagement sans équipe"
+            : "Véhicule de déménagement avec équipe";
         description = `Votre véhicule de déménagement est réservé pour ${reservation.days} jour(s).`;
-        status = reservation.status;
         state = 2;
         details = {
           cityId: reservation.CarMoving.cityId,
@@ -604,56 +659,14 @@ const reservationlist = async (req, res) => {
           tarif: reservation.CarMoving.price,
           immatriculation: reservation.CarMoving.licensePlate,
         };
-      } else if (reservation.Pharmacy) {
-        type = reservation.type === 1 
-          ? "Transport en taxi vers une pharmacie" 
-          : "Location de véhicule vers une pharmacie";
-        description = `Votre transport vers ${reservation.Pharmacy.name} est confirmé.`;
-        status = reservation.status;
-        state = 3;
-        details = {
-          cityId: reservation.Pharmacy.cityId,
-          pharmacie: reservation.Pharmacy.name,
-          adresse: reservation.Pharmacy.address,
-        };
-      } else if (reservation.Tourism) {
-        type = reservation.type === 0 
-          ? `Réservation de visite touristique` 
-          : `Réservation de visite touristique avec véhicule`;
-        description = `Votre visite du site touristique ${reservation.Tourism.title} est programmée !`;
-        state = 4;
-        status = reservation.status;
-        details = {
-          cityId: reservation.Tourism.cityId,
-          site: reservation.Tourism.title,
-          description: reservation.Tourism.descriptions,
-          image: reservation.Tourism.image,
-        };
-      } else if (reservation.Leisure) {
-        type = reservation.type === 0 
-          ? `Réservation d'un lieu de loisirs` 
-          : `Réservation d'un lieu de loisirs avec véhicule`;
-        description = `Profitez de votre moment de détente à ${reservation.Leisure.title} !`;
-        state = 5;
-        status = reservation.status;
-        details = {
-          cityId: reservation.Leisure.cityId,
-          lieu: reservation.Leisure.title,
-          description: reservation.Leisure.description,
-        };
-      } else if (reservation.Property) {
-        type = reservation.type === 0 
-          ? `Réservation de logement` 
-          : `Réservation de logement avec véhicule`;
-        description = `Votre réservation pour ${reservation.Property.title} est confirmée.`;
-        state = 6;
-        status = reservation.status;
-        details = {
-          cityId: reservation.Property.cityId,
-          logement: reservation.Property.title,
-          image: reservation.Property.image,
-          tarif: reservation.Property.price,
-        };
+      } else if (reservation.Car) {
+        type =
+          reservation.type === 1
+            ? "Location de véhicule sans chauffeur"
+            : "Location de véhicule avec chauffeur";
+        description = `Votre réservation pour ${reservation.days} jour(s) est enregistrée.`;
+        state = 1;
+        details = carDetails;
       }
 
       const formattedDate = new Date(reservation.date).toLocaleString("fr-FR", {
@@ -661,17 +674,13 @@ const reservationlist = async (req, res) => {
         month: "long",
         year: "numeric",
       });
+      let statusText =
+        status === 1
+          ? "En attente de validation"
+          : status === 0
+          ? "Annulé"
+          : "Confirmée";
 
-      let statusText = "";
-
-      if (status === 1) {
-        statusText = "En attente de validation";
-      } else if (status === 0) {
-        statusText = "Annulé";
-      } else if (status === 2) {
-        statusText = "Confirmée";
-      }
-      
       return {
         id: reservation.id,
         type,
@@ -680,22 +689,21 @@ const reservationlist = async (req, res) => {
         description,
         statut: statusText,
         state,
-        détails: details
+        détails: details,
       };
     });
 
-    return res.status(200).json({
-      status: "success",
-      data: formattedReservations,
-    });
+    return res
+      .status(200)
+      .json({ status: "success", data: formattedReservations });
   } catch (error) {
     console.error(`ERROR LIST RESERVATION: ${error}`);
-    appendErrorLog(`ERROR LIST RESERVATION: ${error}`);
-    return res.status(500).json({
-      status: "error",
-      message:
-        "Une erreur s'est produite lors de la récupération des réservations.",
-    });
+    return res
+      .status(500)
+      .json({
+        status: "error",
+        message: "Erreur lors de la récupération des réservations.",
+      });
   }
 };
 
@@ -806,9 +814,9 @@ const cancelReservation = async (req, res) => {
       const message = {
         notification: {
           title: "Réservation annulée",
-          body: `Votre réservation en date du ${new Date(reservation.date).toLocaleString(
-            "fr-FR"
-          )} a été annulée avec succès.`,
+          body: `Votre réservation en date du ${new Date(
+            reservation.date
+          ).toLocaleString("fr-FR")} a été annulée avec succès.`,
         },
         token: reservation.User.token,
       };
@@ -897,8 +905,8 @@ const deleteReservation = async (req, res) => {
       });
     }
 
-     // Vérifier si la réservation est déjà annulée
-     if (reservation.isShow === false) {
+    // Vérifier si la réservation est déjà annulée
+    if (reservation.isShow === false) {
       return res.status(400).json({
         status: "error",
         message: "La réservation est déjà annulée.",
@@ -942,34 +950,22 @@ const deleteReservation = async (req, res) => {
         "Une erreur est survenue lors de la suppression de la réservation.",
     });
   }
-}
+};
 
 const reservationCar = async (req, res) => {
   try {
-    console.error("Headers reçus :", req.headers);
-    console.error("Body reçu :", req.body);
-    console.error("Fichier reçu :", req.file);
-
     const token = req.headers.authorization;
     const { bookingId, carId, payment, days, date, amount, type } = req.body;
     const host = req.get("host");
     const image = req.file;
 
-    // console,log de toutes les données recues
-    console.error({
-      bookingId,
-      carId,
-      payment,
-      days,
-      date,
-      amount,
-      type,
-      image,
-    });
-
-    if(!bookingId){
-      return res.status(400)
-      .json({ status: "error", message: "La réservation en cours est obligatoire." });
+    if (!bookingId) {
+      return res
+        .status(400)
+        .json({
+          status: "error",
+          message: "La réservation en cours est obligatoire.",
+        });
     }
 
     if (!date) {
@@ -985,7 +981,10 @@ const reservationCar = async (req, res) => {
     if (!image) {
       return res
         .status(400)
-        .json({ status: "error", message: "Une piece jointe est obligatoire." });
+        .json({
+          status: "error",
+          message: "Une piece jointe est obligatoire.",
+        });
     }
     if (!payment) {
       return res
@@ -993,8 +992,10 @@ const reservationCar = async (req, res) => {
         .json({ status: "error", message: "Le paiement est obligatoire." });
     }
     if (!carId) {
-      return res
-        .json({ status: "error", message: "ID de la voiture est obligatoire." });
+      return res.json({
+        status: "error",
+        message: "ID de la voiture est obligatoire.",
+      });
     }
 
     // Vérifie si l'en-tête commence par "Bearer "
@@ -1031,19 +1032,26 @@ const reservationCar = async (req, res) => {
     const customerId = decodedToken.id;
     const customer = await User.findByPk(customerId);
     if (!customer) {
-        return res.status(400).json({ status: "error", message: "Le client n'existe pas." });
+      return res
+        .status(400)
+        .json({ status: "error", message: "Le client n'existe pas." });
     }
 
     const car = await Car.findByPk(carId);
     if (!car) {
-      return res.status(400).json({ status: "error", message: "La voiture n'existe pas." });
+      return res
+        .status(400)
+        .json({ status: "error", message: "La voiture n'existe pas." });
     }
 
     const paymentMethod = await PaymentMethod.findByPk(payment);
     if (!paymentMethod) {
       return res
         .status(400)
-        .json({ status: "error", message: "Le moyen de paiement n'existe pas." });
+        .json({
+          status: "error",
+          message: "Le moyen de paiement n'existe pas.",
+        });
     }
 
     const reservation = await Reservation.findByPk(bookingId);
@@ -1053,14 +1061,20 @@ const reservationCar = async (req, res) => {
         .json({ status: "error", message: "La reservation n'existe pas." });
     }
 
+    // 🟢 Récupérer le montant actuel de la réservation
+    const existingAmount = parseFloat(reservation.amount) || 0;
+
+    // 🟢 Additionner le montant en cours avec le montant précédent
+    const newAmount = existingAmount + parseFloat(amount);
+
     const imagePath = `attachments/${image.filename}`;
     const imageUrl = `${req.protocol}://${host}/${imagePath}`;
 
     reservation.update({
       carId: carId,
       attachment: imageUrl,
-      amount,
-      type: 1
+      amount: newAmount,
+      type: 7,
     });
 
     // Envoi d'une notification au client, si un token est présent
@@ -1076,16 +1090,21 @@ const reservationCar = async (req, res) => {
 
       try {
         await admin.messaging().send(message);
-        console.log(`Notification envoyée à l'utilisateur avec le token : ${userToken}`);
+        console.log(
+          `Notification envoyée à l'utilisateur avec le token : ${userToken}`
+        );
       } catch (error) {
-        console.error(`Erreur lors de l'envoi de la notification : ${error.message}`);
+        console.error(
+          `Erreur lors de l'envoi de la notification : ${error.message}`
+        );
         // Vous pouvez aussi enregistrer cette erreur dans vos logs pour un examen ultérieur
       }
     }
 
     return res.status(200).json({
       status: "success",
-      message: "Votre reservation de véhicule a ete prise en compte avec succes.", 
+      message:
+        "Votre reservation de véhicule a ete prise en compte avec succes.",
     });
   } catch (error) {
     console.error(`Erreur lors de la réservation d'un véhicule : ${error}`);
@@ -1095,7 +1114,7 @@ const reservationCar = async (req, res) => {
       message: "Une erreur est survenue lors de la réservation d'un véhicule.",
     });
   }
-}
+};
 
 module.exports = {
   create,
@@ -1107,5 +1126,5 @@ module.exports = {
   notification,
   cancelReservation,
   deleteReservation,
-  reservationCar
+  reservationCar,
 };

@@ -415,7 +415,7 @@ const reservation = async (req, res) => {
       date,
       amount,
       status: 1,
-      type,
+      type: 0,
       attachment: imageUrl,
     });
 
