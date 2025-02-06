@@ -593,6 +593,7 @@ const reservationlist = async (req, res) => {
               : reservation.Car.priceWithDriver,
           immatriculation: reservation.Car.licensePlate,
         };
+        state = 7; 
       }
 
       if (reservation.Tourism) {
@@ -600,7 +601,7 @@ const reservationlist = async (req, res) => {
           ? "Réservation de visite touristique avec véhicule"
           : "Réservation de visite touristique";
         description = `Votre visite du site touristique ${reservation.Tourism.title} est programmée !`;
-        state = 4;
+        state = state || 4;
         details = {
           cityId: reservation.Tourism.cityId,
           site: reservation.Tourism.title,
@@ -613,7 +614,7 @@ const reservationlist = async (req, res) => {
           ? "Réservation d'un lieu de loisirs avec véhicule"
           : "Réservation d'un lieu de loisirs";
         description = `Profitez de votre moment de détente à ${reservation.Leisure.title} !`;
-        state = 5;
+        state = state || 5;
         details = {
           cityId: reservation.Leisure.cityId,
           lieu: reservation.Leisure.title,
@@ -625,7 +626,7 @@ const reservationlist = async (req, res) => {
           ? "Réservation de logement avec véhicule"
           : "Réservation de logement";
         description = `Votre réservation pour ${reservation.Property.title} est confirmée.`;
-        state = 6;
+        state = state || 6;
         details = {
           cityId: reservation.Property.cityId,
           logement: reservation.Property.title,
@@ -638,7 +639,7 @@ const reservationlist = async (req, res) => {
           ? "Transport en taxi vers une pharmacie avec véhicule"
           : "Transport en taxi vers une pharmacie";
         description = `Votre transport vers ${reservation.Pharmacy.name} est confirmé.`;
-        state = 3;
+        state = state || 3;
         details = {
           cityId: reservation.Pharmacy.cityId,
           pharmacie: reservation.Pharmacy.name,
@@ -651,7 +652,7 @@ const reservationlist = async (req, res) => {
             ? "Véhicule de déménagement sans équipe"
             : "Véhicule de déménagement avec équipe";
         description = `Votre véhicule de déménagement est réservé pour ${reservation.days} jour(s).`;
-        state = 2;
+        state = state || 2;
         details = {
           cityId: reservation.CarMoving.cityId,
           véhicule: reservation.CarMoving.name,
@@ -665,7 +666,7 @@ const reservationlist = async (req, res) => {
             ? "Location de véhicule sans chauffeur"
             : "Location de véhicule avec chauffeur";
         description = `Votre réservation pour ${reservation.days} jour(s) est enregistrée.`;
-        state = 1;
+        state = state || 1;
         details = carDetails;
       }
 
@@ -674,12 +675,14 @@ const reservationlist = async (req, res) => {
         month: "long",
         year: "numeric",
       });
-      let statusText =
-        status === 1
-          ? "En attente de validation"
-          : status === 0
-          ? "Annulé"
-          : "Confirmée";
+
+      if (status === 0) {
+        statusText = "Annulé";
+      } else if (status === 2) {
+        statusText = "Confirmée";
+      } else{
+        statusText = "En attente de validation";
+      }  
 
       return {
         id: reservation.id,
