@@ -624,7 +624,7 @@ const reservationlist = async (req, res) => {
         state = 4;
         status = reservation.status;
         details = {
-          cityId: reservation.Pharmacy.cityId,
+          cityId: reservation.Tourism.cityId,
           site: reservation.Tourism.title,
           description: reservation.Tourism.descriptions,
           image: reservation.Tourism.image,
@@ -639,7 +639,7 @@ const reservationlist = async (req, res) => {
         state = 5;
         status = reservation.status;
         details = {
-          cityId: reservation.Pharmacy.cityId,
+          cityId: reservation.Leisure.cityId,
           lieu: reservation.Leisure.title,
           description: reservation.Leisure.description,
         };
@@ -653,7 +653,7 @@ const reservationlist = async (req, res) => {
         state = 6;
         status = reservation.status;
         details = {
-          cityId: reservation.Pharmacy.cityId,
+          cityId: reservation.Property.cityId,
           logement: reservation.Property.title,
           image: reservation.Property.image,
           tarif: reservation.Property.price,
