@@ -381,8 +381,7 @@ const reservation = async (req, res) => {
     
     return res.status(201).json({
       status: "success",
-      message:
-        "Votre réservation de votre logement a bien été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !",
+      message: "Votre réservation à été prise en charge avec succès, veuillez vous rendre dans votre historique vous pouvez réserver un véhicule ou modifier."
     });
   } catch (error) {
     console.error(`ERROR RESERVATION CARMOVING: ${error}`);

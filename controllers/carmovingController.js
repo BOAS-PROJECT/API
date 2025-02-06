@@ -310,8 +310,7 @@ const reservation = async (req, res) => {
 
     return res.status(201).json({
       status: "success",
-      message:
-        "Votre réservation de véhicule de déménagement a été prise en compte avec succès. Vous serrez contacté sous peu, merci.",
+      message:"Votre réservation à été prise en charge avec succès, veuillez vous rendre dans votre historique pour pouvoir modifier-annuler-changer le mode paiement, suivi évolution du déménagement.",
     });
   } catch (error) {
     console.error(`ERROR RESERVATION CARMOVING: ${error}`);
