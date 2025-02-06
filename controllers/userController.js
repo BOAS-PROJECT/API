@@ -946,17 +946,32 @@ const deleteReservation = async (req, res) => {
 const reservationCar = async (req, res) => {
   try {
     const token = req.headers.authorization;
-    const bookingid = req.headers.bookingid;
-    const amount = req.headers.amount;
-    const { carId, payment, type } = req.body;
+    const { bookingId, carId, payment, days, date, amount, type } = req.body;
     const host = req.get("host");
     const image = req.file;
 
-    if(!bookingid){
+    // console,log de toutes les données recues
+    console.error({
+      bookingId,
+      carId,
+      payment,
+      days,
+      date,
+      amount,
+      type,
+      image,
+    });
+
+    if(!bookingId){
       return res.status(400)
       .json({ status: "error", message: "La réservation en cours est obligatoire." });
     }
 
+    if (!date) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "La date est obligatoire." });
+    }
     if (!amount) {
       return res
         .status(400)
@@ -1026,7 +1041,7 @@ const reservationCar = async (req, res) => {
         .json({ status: "error", message: "Le moyen de paiement n'existe pas." });
     }
 
-    const reservation = await Reservation.findByPk(bookingid);
+    const reservation = await Reservation.findByPk(bookingId);
     if (!reservation) {
       return res
         .status(400)
