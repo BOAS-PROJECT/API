@@ -530,7 +530,7 @@ const reservationlist = async (req, res) => {
     const reservations = await Reservation.findAll({
       where: { userId, isShow: true },
       order: [["createdAt", "DESC"]],
-      attributes: ["id", "status", "amount", "date", "type", "days"],
+      attributes: ["id", "carId", "carMovingId", "pharmacyId", "propertyId", "tourismId", "leisureId", "status", "amount", "date", "type", "days"],
       include: [
         {
           model: Car,
@@ -615,12 +615,10 @@ const reservationlist = async (req, res) => {
           adresse: reservation.Pharmacy.address,
         };
       } else if (reservation.Tourism) {
-        type = reservation.type === 1 
-          ? `Transport en taxi vers ${reservation.Tourism.title}` 
-          : reservation.type === 2 
-          ? `Location de véhicule sans chauffeur vers ${reservation.Tourism.title}` 
-          : `Location de véhicule avec chauffeur vers ${reservation.Tourism.title}`;
-        description = `Votre visite à ${reservation.Tourism.title} est programmée !`;
+        type = reservation.type === 0 
+          ? `Réservation de visite touristique` 
+          : `Réservation de visite touristique avec véhicule`;
+        description = `Votre visite du site touristique ${reservation.Tourism.title} est programmée !`;
         state = 4;
         status = reservation.status;
         details = {
@@ -630,11 +628,9 @@ const reservationlist = async (req, res) => {
           image: reservation.Tourism.image,
         };
       } else if (reservation.Leisure) {
-        type = reservation.type === 1 
-          ? `Transport en taxi vers ${reservation.Leisure.title}` 
-          : reservation.type === 2 
-          ? `Location de véhicule sans chauffeur vers ${reservation.Leisure.title}` 
-          : `Location de véhicule avec chauffeur vers ${reservation.Leisure.title}`;
+        type = reservation.type === 0 
+          ? `Réservation d'un lieu de loisirs` 
+          : `Réservation d'un lieu de loisirs avec véhicule`;
         description = `Profitez de votre moment de détente à ${reservation.Leisure.title} !`;
         state = 5;
         status = reservation.status;
@@ -644,11 +640,9 @@ const reservationlist = async (req, res) => {
           description: reservation.Leisure.description,
         };
       } else if (reservation.Property) {
-        type = reservation.type === 1 
-          ? `Transport en taxi vers ${reservation.Property.title}` 
-          : reservation.type === 2 
-          ? `Location de véhicule sans chauffeur vers ${reservation.Property.title}` 
-          : `Location de véhicule avec chauffeur vers ${reservation.Property.title}`;
+        type = reservation.type === 0 
+          ? `Réservation de logement` 
+          : `Réservation de logement avec véhicule`;
         description = `Votre réservation pour ${reservation.Property.title} est confirmée.`;
         state = 6;
         status = reservation.status;
@@ -948,6 +942,143 @@ const deleteReservation = async (req, res) => {
   }
 }
 
+const reservationCar = async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+    const { reservationId, carId, payment, days, date, amount, type } = req.body;
+    const host = req.get("host");
+    const image = req.file;
+
+    if(!reservationId){
+      return res.status(400)
+      .json({ status: "error", message: "La réservation en cours est obligatoire." });
+    }
+
+    if (!date) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "La date est obligatoire." });
+    }
+    if (!amount) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Le montant est obligatoire." });
+    }
+    if (!image) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Une piece jointe est obligatoire." });
+    }
+    if (!payment) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Le paiement est obligatoire." });
+    }
+    if (!carId) {
+      return res
+        .json({ status: "error", message: "ID de la voiture est obligatoire." });
+    }
+
+    // Vérifie si l'en-tête commence par "Bearer "
+    if (!token.startsWith("Bearer ")) {
+      return res.status(401).json({
+        status: "error",
+        message: "Format de token invalide.",
+      });
+    }
+
+    // Extrait le token en supprimant le préfixe "Bearer "
+    const customToken = token.substring(7);
+    let decodedToken;
+
+    try {
+      decodedToken = jwt.verify(customToken, process.env.JWT_SECRET);
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .json({ status: "error", message: "TokenExpiredError" });
+      }
+      return res
+        .status(401)
+        .json({ status: "error", message: `Token 401. ${error}` });
+    }
+
+    if (!decodedToken) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token decode non fourni." });
+    }
+
+    const customerId = decodedToken.id;
+    const customer = await User.findByPk(customerId);
+    if (!customer) {
+        return res.status(400).json({ status: "error", message: "Le client n'existe pas." });
+    }
+
+    const car = await Car.findByPk(carId);
+    if (!car) {
+      return res.status(400).json({ status: "error", message: "La voiture n'existe pas." });
+    }
+
+    const paymentMethod = await PaymentMethod.findByPk(payment);
+    if (!paymentMethod) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Le moyen de paiement n'existe pas." });
+    }
+
+    const reservation = await Reservation.findByPk(reservationId);
+    if (!reservation) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "La reservation n'existe pas." });
+    }
+
+    const imagePath = `attachments/${image.filename}`;
+    const imageUrl = `${req.protocol}://${host}/${imagePath}`;
+
+    reservation.update({
+      carId: carId,
+      attachment: imageUrl,
+      amount,
+      type
+    });
+
+    // Envoi d'une notification au client, si un token est présent
+    if (customer.token) {
+      const userToken = customer.token;
+      const message = {
+        token: userToken,
+        notification: {
+          title: "Félicitations!",
+          body: `Votre réservation de véhicule a été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !`,
+        },
+      };
+
+      try {
+        await admin.messaging().send(message);
+        console.log(`Notification envoyée à l'utilisateur avec le token : ${userToken}`);
+      } catch (error) {
+        console.error(`Erreur lors de l'envoi de la notification : ${error.message}`);
+        // Vous pouvez aussi enregistrer cette erreur dans vos logs pour un examen ultérieur
+      }
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Votre reservation de véhicule a ete prise en compte avec succes.", 
+    });
+  } catch (error) {
+    console.error(`Erreur lors de la réservation d'un véhicule : ${error}`);
+    appendErrorLog(`Erreur lors de la réservation d'un véhicule : ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message: "Une erreur est survenue lors de la réservation d'un véhicule.",
+    });
+  }
+}
+
 module.exports = {
   create,
   login,
@@ -957,5 +1088,6 @@ module.exports = {
   reservationlist,
   notification,
   cancelReservation,
-  deleteReservation
+  deleteReservation,
+  reservationCar
 };

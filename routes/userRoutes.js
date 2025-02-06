@@ -30,4 +30,7 @@ router.post("/delete-reservation", userController.deleteReservation);
 // NOTIFICATION
 router.post("/notification", userController.notification);
 
+// RESERVATION D'UN VÉHICULE
+router.put("/book-car", userController.reservationCar);
+
 module.exports = router;
