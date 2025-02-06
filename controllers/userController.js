@@ -656,7 +656,7 @@ const reservationlist = async (req, res) => {
         details = {
           cityId: reservation.CarMoving.cityId,
           véhicule: reservation.CarMoving.name,
-          image: reservation.CarMoving.image,
+          imageCar: reservation.CarMoving.image,
           tarif: reservation.CarMoving.price,
           immatriculation: reservation.CarMoving.licensePlate,
         };
