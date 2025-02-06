@@ -31,6 +31,6 @@ router.post("/delete-reservation", userController.deleteReservation);
 router.post("/notification", userController.notification);
 
 // RESERVATION D'UN VÉHICULE
-router.post("/book-car", userController.reservationCar);
+router.post("/book-car", upload.single("photo"), userController.reservationCar);
 
 module.exports = router;
