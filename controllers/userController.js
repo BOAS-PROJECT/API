@@ -1042,7 +1042,7 @@ const reservationCar = async (req, res) => {
       carId: carId,
       attachment: imageUrl,
       amount,
-      type
+      type: 1
     });
 
     // Envoi d'une notification au client, si un token est présent
