@@ -1,6 +1,7 @@
 const express = require("express");
 const userController = require("../controllers/userController");
 const upload = require("../utils/customerMulterConfig");
+const fileUpload = require("../utils/attachementConfig");
 const router = express.Router();
 
 // CREATION DU COMPTE
@@ -31,6 +32,6 @@ router.post("/delete-reservation", userController.deleteReservation);
 router.post("/notification", userController.notification);
 
 // RESERVATION D'UN VÉHICULE
-router.post("/book-car", upload.single("photo"), userController.reservationCar);
+router.post("/book-car", fileUpload.single("image"), userController.reservationCar);
 
 module.exports = router;
