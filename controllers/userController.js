@@ -947,7 +947,8 @@ const reservationCar = async (req, res) => {
   try {
     const token = req.headers.authorization;
     const bookingid = req.headers.bookingid;
-    const { carId, payment, amount, type } = req.body;
+    const amount = req.headers.amount;
+    const { carId, payment, type } = req.body;
     const host = req.get("host");
     const image = req.file;
 
