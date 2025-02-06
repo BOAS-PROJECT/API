@@ -13,6 +13,7 @@ const {
   Leisure,
   CarMoving,
   Property,
+  PaymentMethod,
 } = require("../models");
 const { appendErrorLog } = require("../utils/logging");
 const { token } = require("morgan");
@@ -945,17 +946,17 @@ const deleteReservation = async (req, res) => {
 const reservationCar = async (req, res) => {
   try {
     const token = req.headers.authorization;
-    const { reservationId, carId, payment, days, date, amount, type } = req.body;
+    const { bookingId, carId, payment, days, date, amount, type } = req.body;
     const host = req.get("host");
     const image = req.file;
 
     return res.status(200)
     .json({
       status: "success",
-      message: "reservationId" + reservationId,
+      message: "reservationId" + bookingId,
     })
 
-    if(!reservationId){
+    if(!bookingId){
       return res.status(400)
       .json({ status: "error", message: "La réservation en cours est obligatoire." });
     }
@@ -1034,7 +1035,7 @@ const reservationCar = async (req, res) => {
         .json({ status: "error", message: "Le moyen de paiement n'existe pas." });
     }
 
-    const reservation = await Reservation.findByPk(reservationId);
+    const reservation = await Reservation.findByPk(bookingId);
     if (!reservation) {
       return res
         .status(400)
