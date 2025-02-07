@@ -254,11 +254,10 @@ const list = async (req, res) => {
   }
 };
 
-
 const reservation = async (req, res) => {
   try {
     const token = req.headers.authorization;
-    const { propertyId, date, amount } = req.body;
+    const { propertyId, date, amount, days } = req.body;
 
     if (!token) {
       return res
@@ -284,6 +283,15 @@ const reservation = async (req, res) => {
         .json({
           status: "error",
           message: "ID de la propriete est obligatoire.",
+        });
+    }
+
+    if (!days) {
+      return res
+        .status(400)
+        .json({
+          status: "error",
+          message: "Le nombre de jours est obligatoire.",
         });
     }
 
@@ -338,6 +346,7 @@ const reservation = async (req, res) => {
       propertyId: propertyId,
       paymentMethodId: 1,
       date,
+      days,
       status: 1,
     });
 
