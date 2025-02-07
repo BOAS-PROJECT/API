@@ -625,7 +625,7 @@ const reservationlist = async (req, res) => {
         type = carDetails
           ? "Réservation de logement avec véhicule"
           : "Réservation de logement";
-        description = `Votre réservation pour ${reservation.Property.title} est confirmée.`;
+        description = `Votre réservation pour ${reservation.Property.title} pour ${reservation.days} jour(s) est confirmée.`;
         state = state || 6;
         details = {
           cityId: reservation.Property.cityId,
