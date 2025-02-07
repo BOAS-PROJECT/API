@@ -1,4 +1,4 @@
-const { Leisure, LeisureImage, Reservation, User } = require("../models");
+const { Leisure, LeisureImage, Reservation, User, City } = require("../models");
 const jwt = require("jsonwebtoken");
 const admin = require("firebase-admin");
 const { appendErrorLog } = require("../utils/logging");
@@ -156,7 +156,87 @@ const reservation = async (req, res) => {
   }
 };
 
+const create = async (req, res) => {
+  try {
+    const host = req.get("host");
+    const image = req.file;
+    const { city, title, description, address } = req.body;
+
+
+    if (!city) {
+      return res.status(400).json({
+        status: "error",
+        message: "La ville est obligatoire.",
+      });
+    }
+
+    if (!title) {
+      return res.status(400).json({
+        status: "error",
+        message: "Le titre du bien est obligatoire.",
+      });
+    }
+
+    if (!description) {
+      return res.status(400).json({
+        status: "error",
+        message: "La description du bien est obligatoire.",
+      });
+    }
+
+    if (!address) {
+      return res.status(400).json({
+        status: "error",
+        message: "L'adresse du bien est obligatoire.",
+      });
+    }
+
+   
+    const existingCity = await City.findOne({ where: { id: city } });
+    if (!existingCity) {
+      return res.status(400).json({
+        status: "error",
+        message: "La ville n'existe pas.",
+      });
+    }
+
+    const imagePath = `leisures/${image.filename}`;
+    const imageUrl = `${req.protocol}://${host}/${imagePath}`;
+
+    const existingProperty = await Leisure.findOne({
+      where: { cityId: city, title },
+    });
+    if (existingProperty) {
+      return res.status(400).json({
+        status: "error",
+        message: "Un loisir avec ce nom existe déja dans cette ville.",
+      });
+    }
+
+    await Leisure.create({
+      cityId: city,
+      title,
+      description,
+      image: imageUrl,
+      address
+    });
+
+    return res.status(201).json({
+      status: "success",
+      message: "Le loisir à été cree avec succes.",
+    });
+  } catch (error) {
+    console.error(`ERROR CREATE PROPERTY: ${error}`);
+    appendErrorLog(`ERROR CREATE PROPERTY: ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message: "Une erreur s'est produite lors de la creation de la propriete.",
+    });
+  }
+};
+
 module.exports = {
     list,
     reservation,
+    create
 };

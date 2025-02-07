@@ -10,7 +10,7 @@ router.post("/create-type", propertyController.createtype);
 router.post("/create", upload.single("image"), propertyController.create);
 
 // CREATION DU PROPRIETAIRE DU BIEN
-router.post("/create-owner", propertyController.createOwner);
+router.post("/owner-create", propertyController.owner);
 
 // LISTE DES BIENS
 router.get("/list", propertyController.list);

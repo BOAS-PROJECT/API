@@ -162,9 +162,9 @@ const create = async (req, res) => {
   }
 };
 
-const createOwner = async (req, res) => {
+const owner = async (req, res) => {
   try {
-    const { cityId ,name, phone, email, address } = req.body;
+    const { cityId, phone, email, address, name } = req.body;
 
     if (!cityId) {
       return res.status(400).json({
@@ -191,25 +191,6 @@ const createOwner = async (req, res) => {
       return res.status(400).json({
         status: "error",
         message: "L'adresse est obligatoire.",
-      });
-    }
-
-    const existingCity = await City.findOne({ where: { id: cityId } });
-    if (!existingCity) {
-      return res.status(400).json({
-        status: "error",
-        message: "La ville n'existe pas.",
-      });
-    }
-
-    const existingOwner = await OwnerProperty.findOne({
-      where: { name, phone },
-    });
-    if (existingOwner) {
-      return res.status(400).json({
-        status: "error",
-        message:
-          "Un proprietaire avec ce nom et numéro de téléphone existe deja.",
       });
     }
 
@@ -396,7 +377,7 @@ const reservation = async (req, res) => {
 module.exports = {
   createtype,
   create,
-  createOwner,
+  owner,
   list,
   reservation,
 };
