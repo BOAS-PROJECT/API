@@ -15,13 +15,13 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.Rating, { foreignKey: 'carId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.hasMany(models.Reservation, { foreignKey: 'carId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.belongsTo(models.City, { foreignKey: 'cityId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      this.hasMany(models.CarImage, { foreignKey: 'carId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' }); 
     }
   }
   Car.init({
     cityId: DataTypes.INTEGER,
     makeId: DataTypes.INTEGER,
     name: DataTypes.STRING,
-    image: DataTypes.STRING,
     priceWithoutDriver: DataTypes.DOUBLE,
     priceWithDriver: DataTypes.DOUBLE,
     priceFuelwithDriver: DataTypes.DOUBLE,

@@ -167,133 +167,146 @@ const create = async (req, res) => {
 
 const listWithDriver = async (req, res) => {
   try {
-   const cityid = req.headers.cityid;
-   if (!cityid) {
-     return res
-       .status(400)
-       .json({ status: "error" ,message: "ID de la ville est obligatoire." });
-   }
-   const cars = await Car.findAll({
-    where: { isDriver: true, cityId: cityid },
-    attributes: {
-      exclude: ["createdAt", "updatedAt", "priceWithoutDriver"],
-      include: [
-        [
-          sequelize.literal(
-            `(SELECT COALESCE(AVG(rating), 5) 
-              FROM "Ratings" 
-              WHERE "Ratings"."carId" = "Car"."id")`
-          ),
-          "averageRating",
+    const cityid = req.headers.cityid;
+    if (!cityid) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "ID de la ville est obligatoire." });
+    }
+
+    const cars = await Car.findAll({
+      where: { isDriver: true, cityId: cityid },
+      attributes: {
+        exclude: ["createdAt", "updatedAt", "priceWithoutDriver"],
+        include: [
+          [
+            sequelize.literal(
+              `(SELECT COALESCE(AVG(rating), 5)
+               FROM "Ratings"
+               WHERE "Ratings"."carId" = "Car"."id")`
+            ),
+            "averageRating",
+          ],
         ],
+      },
+      include: [
+        {
+          model: CarMake,
+          attributes: ["name"],
+        },
+        {
+          model: CarImage,
+          attributes: ["image"],
+        },
       ],
-    },
-    include: {
-      model: CarMake,
-      attributes: ["name"],
-    },
-    order: [["name", "DESC"]],
-  });
+      order: [["name", "DESC"]],
+    });
 
-  // Formatter la réponse
-  const responseFormat = cars.map((car) => ({
-    id: car.id,
-    model: car.CarMake.name,
-    name: car.name,
-    image: car.image,
-    price: car.priceWithDriver,
-    model: car.model,
-    year: car.year,
-    seats: car.seats,
-    transmission: car.transmission,
-    licensePlate: car.licensePlate,
-    fuel: car.fuel,
-    caution: car.caution,
-    cautionFuelwithDriver: car.priceFuelwithDriver,
-    cautionFuelWithoutDriver: car.priceFuelWithoutDriver,
-    descriptionWithoutDriver: car.descriptionWithoutDriver,
-    descriptionWithDriver: car.descriptionWithDriver,
-    averageRating: parseFloat(car.getDataValue("averageRating")),
-  }));
+    // Formatter la réponse
+    const responseFormat = cars.map((car) => ({
+      id: car.id,
+      model: car.CarMake.name,
+      name: car.name,
+      images: car.CarImages.map(image => image.image),
+      price: car.priceWithDriver,
+      model: car.model,
+      year: car.year,
+      seats: car.seats,
+      transmission: car.transmission,
+      licensePlate: car.licensePlate,
+      fuel: car.fuel,
+      caution: car.caution,
+      cautionFuelwithDriver: car.priceFuelwithDriver,
+      cautionFuelWithoutDriver: car.priceFuelWithoutDriver,
+      descriptionWithoutDriver: car.descriptionWithoutDriver,
+      descriptionWithDriver: car.descriptionWithDriver,
+      averageRating: parseFloat(car.getDataValue("averageRating")),
+    }));
 
-   return res.status(200).json({
-     status: "success",
-     data: responseFormat,
-   });
+    return res.status(200).json({
+      status: "success",
+      data: responseFormat,
+    });
   } catch (error) {
     console.error(`ERROR LIST CAR WITH DRIVER: ${error}`);
     appendErrorLog(`ERROR LIST CAR WITH DRIVER: ${error}`);
     return res
       .status(500)
       .json({
-        error: "Une erreur s'est produite lors de la creation de la voiture.",
+        error: "Une erreur s'est produite lors de la création de la voiture.",
       });
   }
 };
 
 const listWithoutDriver = async (req, res) => {
   try {
-   const cityid = req.headers.cityid;
-   if (!cityid) {
-     return res
-       .status(400)
-       .json({ status: "error", message: "ID de la ville est obligatoire." });
-   }
-   const cars = await Car.findAll({
-    where: { isDriver: false, cityId: cityid },
-    attributes: {
-      exclude: ["createdAt", "updatedAt", "priceWithDriver"],
-      include: [
-        [
-          sequelize.literal(
-            `(SELECT COALESCE(AVG(rating), 5) 
-              FROM "Ratings" 
-              WHERE "Ratings"."carId" = "Car"."id")`
-          ),
-          "averageRating",
+    const cityid = req.headers.cityid;
+    if (!cityid) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "ID de la ville est obligatoire." });
+    }
+
+    const cars = await Car.findAll({
+      where: { isDriver: false, cityId: cityid },
+      attributes: {
+        exclude: ["createdAt", "updatedAt", "priceWithoutDriver"],
+        include: [
+          [
+            sequelize.literal(
+              `(SELECT COALESCE(AVG(rating), 5)
+               FROM "Ratings"
+               WHERE "Ratings"."carId" = "Car"."id")`
+            ),
+            "averageRating",
+          ],
         ],
+      },
+      include: [
+        {
+          model: CarMake,
+          attributes: ["name"],
+        },
+        {
+          model: CarImage,
+          attributes: ["image"],
+        },
       ],
-    },
-    include: {
-      model: CarMake,
-      attributes: ["name"],
-    },
-    order: [["name", "DESC"]],
-  });
+      order: [["name", "DESC"]],
+    });
 
-  // Formatter la réponse
-  const responseFormat = cars.map((car) => ({
-    id: car.id,
-    model: car.CarMake.name,
-    name: car.name,
-    image: car.image,
-    price: car.priceWithoutDriver,
-    model: car.model,
-    year: car.year,
-    seats: car.seats,
-    transmission: car.transmission,
-    licensePlate: car.licensePlate,
-    fuel: car.fuel,
-    caution: car.caution,
-    cautionFuelwithDriver: car.priceFuelwithDriver,
-    cautionFuelWithoutDriver: car.priceFuelWithoutDriver,
-    descriptionWithoutDriver: car.descriptionWithoutDriver,
-    descriptionWithDriver: car.descriptionWithDriver,
-    averageRating: parseFloat(car.getDataValue("averageRating")),
-  }));
+    // Formatter la réponse
+    const responseFormat = cars.map((car) => ({
+      id: car.id,
+      model: car.CarMake.name,
+      name: car.name,
+      images: car.CarImages.map(image => image.image),
+      price: car.priceWithDriver,
+      model: car.model,
+      year: car.year,
+      seats: car.seats,
+      transmission: car.transmission,
+      licensePlate: car.licensePlate,
+      fuel: car.fuel,
+      caution: car.caution,
+      cautionFuelwithDriver: car.priceFuelwithDriver,
+      cautionFuelWithoutDriver: car.priceFuelWithoutDriver,
+      descriptionWithoutDriver: car.descriptionWithoutDriver,
+      descriptionWithDriver: car.descriptionWithDriver,
+      averageRating: parseFloat(car.getDataValue("averageRating")),
+    }));
 
-   return res.status(200).json({
-     status: "success",
-     data: responseFormat,
-   });
-    
+    return res.status(200).json({
+      status: "success",
+      data: responseFormat,
+    });
   } catch (error) {
     console.error(`ERROR LIST CAR WITH DRIVER: ${error}`);
     appendErrorLog(`ERROR LIST CAR WITH DRIVER: ${error}`);
     return res
       .status(500)
       .json({
-        error: "Une erreur s'est produite lors de la creation de la voiture.",
+        error: "Une erreur s'est produite lors de la création de la voiture.",
       });
   }
 };
