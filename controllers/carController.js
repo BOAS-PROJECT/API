@@ -1,4 +1,4 @@
-const { Car, CarMake, Rating, User, PaymentMethod, Reservation } = require("../models");
+const { Car, CarMake, CarImage, Rating, User, PaymentMethod, Reservation } = require("../models");
 const sequelize = require("sequelize");
 const jwt = require("jsonwebtoken");
 const admin = require("firebase-admin");
