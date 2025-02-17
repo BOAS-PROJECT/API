@@ -6,6 +6,7 @@ const {
   CarMake,
   Reservation,
   User,
+  CarMovingImage,
   PaymentMethod,
 } = require("../models");
 const { appendErrorLog } = require("../utils/logging");
@@ -156,17 +157,23 @@ const list = async (req, res) => {
     const cars = await CarMoving.findAll({
       where: { cityId: cityid },
       attributes: { exclude: ["createdAt", "updatedAt"] },
-      include: {
-        model: CarMake,
-        attributes: ["name"],
-      },
+      include: [
+        {
+          model: CarMake,
+          attributes: ["name"],
+        },
+        {
+          model: CarMovingImage,
+          attributes: ["image"],
+        },
+      ],
     });
 
     const responseFormat = cars.map((car) => ({
       id: car.id,
       model: car.CarMake.name,
       name: car.name,
-      image: car.image,
+      images: car.CarMovingImages.map(image => image.image),
       volume: car.volume,
       tonage: car.tonage,
       price: car.price,

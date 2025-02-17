@@ -33,10 +33,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      image: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
       volume: {
         type: Sequelize.DOUBLE,
         allowNull: false,

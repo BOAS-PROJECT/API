@@ -14,13 +14,13 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.City, { foreignKey: 'cityId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.belongsTo(models.CarMake, { foreignKey: 'makeId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.hasMany(models.Reservation, { foreignKey: 'carMovingId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      this.hasMany(models.CarMovingImage, { foreignKey: 'carMovingId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
     }
   }
   CarMoving.init({
     cityId: DataTypes.INTEGER,
     makeId: DataTypes.INTEGER,
     name: DataTypes.STRING,
-    image: DataTypes.STRING,
     volume: DataTypes.DOUBLE,
     tonage: DataTypes.DOUBLE,
     price: DataTypes.DOUBLE,
