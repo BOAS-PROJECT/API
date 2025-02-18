@@ -1310,7 +1310,7 @@ const deleteNotification = async (req, res) => {
   }
 }
 
-const deleteAllNotification = async (req, res) => {
+const deleteAllNotifications = async (req, res) => {
   try {
     const token = req.headers.authorization;
     if (!token) {
@@ -1393,5 +1393,6 @@ module.exports = {
   reservationCar,
   sendNotificationToCustomers,
   notificationList,
-  deleteNotification
+  deleteNotification,
+  deleteAllNotifications
 };
