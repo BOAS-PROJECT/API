@@ -16,6 +16,7 @@ const {
   Leisure,
   CarMoving,
   Property,
+  Notification,
   PaymentMethod,
 } = require("../models");
 const { appendErrorLog } = require("../utils/logging");
@@ -1157,6 +1158,228 @@ const sendNotificationToCustomers = async (req, res) => {
   }
 };
 
+const notificationList = async (req, res) => {
+  try {
+     const token = req.headers.authorization;
+     // Vérifie si l'en-tête commence par "Bearer "
+    if (!token.startsWith("Bearer ")) {
+      return res.status(401).json({
+        status: "error",
+        message: "Format de token invalide.",
+      });
+    }
+
+    // Extrait le token en supprimant le préfixe "Bearer "
+    const customToken = token.substring(7);
+    let decodedToken;
+
+    try {
+      decodedToken = jwt.verify(customToken, process.env.JWT_SECRET);
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .json({ status: "error", message: "TokenExpiredError" });
+      }
+      return res
+        .status(401)
+        .json({ status: "error", message: `Token 401. ${error}` });
+    }
+
+    if (!decodedToken) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token decode non fourni." });
+    }
+
+    const customerId = decodedToken.id;
+    const customer = await User.findByPk(customerId);
+    if (!customer) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Le client n'existe pas." });
+    }
+
+    const notifications = await Notification.findAll({
+      where: {
+        userId: customer.id
+      }
+    });
+
+    const formattedNotifications = notifications.map(notification => ({
+      id: notification.id,
+      message: notification.message,
+      createdAt: notification.createdAt
+    }));
+
+    return res.status(200).json({
+      status: "success",
+      data: formattedNotifications
+    });
+
+  } catch (error) {
+    console.error(`ERROR NOTIFICATION LIST: ${error}`);
+    appendErrorLog(`ERROR NOTIFICATION LIST: ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message:
+        "Une erreur s'est produite lors de la transaction.",
+    });
+  }
+}
+
+const deleteNotification = async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+    const { notificationId } = req.body;
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token non fourni." });
+    }
+
+    if (!notificationId) {
+      return res
+        .status(400)
+        .json({
+          status: "error",
+          message: "ID de la notification est obligatoire.",
+        });
+    }
+
+     // Vérifie si l'en-tête commence par "Bearer "
+    if (!token.startsWith("Bearer ")) {
+      return res.status(401).json({
+        status: "error",
+        message: "Format de token invalide.",
+      });
+    }
+
+    // Extrait le token en supprimant le préfixe "Bearer "
+    const customToken = token.substring(7);
+    let decodedToken;
+
+    try {
+      decodedToken = jwt.verify(customToken, process.env.JWT_SECRET);
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .json({ status: "error", message: "TokenExpiredError" });
+      }
+      return res
+        .status(401)
+        .json({ status: "error", message: `Token 401. ${error}` });
+    }
+
+    if (!decodedToken) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token decode non fourni." });
+    }
+
+    const customerId = decodedToken.id;
+    const customer = await User.findByPk(customerId);
+    if (!customer) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Le client n'existe pas." });
+    }
+
+    const notification = await Notification.findByPk(notificationId);
+    if (!notification) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "La notification n'existe pas." });
+    }
+
+    await notification.destroy();
+    return res.status(200).json({
+      status: "success",
+      message: "La notification a ete supprimee avec succes."
+    });
+  } catch (error) {
+    console.error(`ERROR DELETE NOTIFICATION: ${error}`);
+    appendErrorLog(`ERROR DELETE NOTIFICATION: ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message:
+        "Une erreur s'est produite lors de la transaction.",
+    });
+  }
+}
+
+const deleteAllNotification = async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+    if (!token) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token non fourni." });
+    }
+     // Vérifie si l'en-tête commence par "Bearer "
+     if (!token.startsWith("Bearer ")) {
+      return res.status(401).json({
+        status: "error",
+        message: "Format de token invalide.",
+      });
+    }
+
+    // Extrait le token en supprimant le préfixe "Bearer "
+    const customToken = token.substring(7);
+    let decodedToken;
+
+    try {
+      decodedToken = jwt.verify(customToken, process.env.JWT_SECRET);
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .json({ status: "error", message: "TokenExpiredError" });
+      }
+      return res
+        .status(401)
+        .json({ status: "error", message: `Token 401. ${error}` });
+    }
+
+    if (!decodedToken) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token decode non fourni." });
+    }
+
+    const customerId = decodedToken.id;
+    const customer = await User.findByPk(customerId);
+    if (!customer) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Le client n'existe pas." });
+    }
+
+    const notifications = await Notification.findAll({
+      where: {
+        userId: customerId
+      }
+    });
+    notifications.forEach(async (notification) => {
+      await notification.destroy();
+    });
+    return res.status(200).json({
+      status: "success",
+      message: "Toutes les notifications ont ete supprimees avec succes."
+    });
+  } catch (error) {
+    console.error(`ERROR DELETE NOTIFICATION: ${error}`);
+    appendErrorLog(`ERROR DELETE NOTIFICATION: ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message:
+        "Une erreur s'est produite lors de la transaction.",
+    });
+  }
+}
+
 module.exports = {
   create,
   login,
@@ -1168,5 +1391,7 @@ module.exports = {
   cancelReservation,
   deleteReservation,
   reservationCar,
-  sendNotificationToCustomers
+  sendNotificationToCustomers,
+  notificationList,
+  deleteNotification
 };
