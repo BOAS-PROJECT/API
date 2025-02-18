@@ -369,5 +369,4 @@ const updateToken = async (req, res) => {
   }
 }
 
-
 module.exports = { create, validateAccount, listActiveDrivers, login, listInActiveDrivers };
