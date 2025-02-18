@@ -197,6 +197,7 @@ const listWithDriver = async (req, res) => {
         {
           model: CarImage,
           attributes: ["image"],
+          as: "images",
         },
       ],
       order: [["name", "DESC"]],
