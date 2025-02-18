@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.PaymentMethod, { foreignKey: 'paymentMethodId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.belongsTo(models.Leisure, { foreignKey: 'leisureId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.belongsTo(models.Property, { foreignKey: 'propertyId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
-      this.belongsTo(models.Notification, { foreignKey: 'notificationId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      this.hasMany(models.Notification, { foreignKey: 'reservationId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
     }
   }
   Reservation.init({

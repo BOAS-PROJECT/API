@@ -11,9 +11,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.User, { foreignKey: 'userId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
-      this.belongsTo(models.Driver, { foreignKey: 'driverId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
-      this.belongsTo(models.Reservation, { foreignKey: 'reservationId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      this.belongsTo(models.User, { foreignKey: 'userId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      this.belongsTo(models.Driver, { foreignKey: 'driverId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      this.belongsTo(models.Reservation, { foreignKey: 'reservationId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
     }
   }
   Notification.init({
