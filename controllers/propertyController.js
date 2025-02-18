@@ -355,7 +355,7 @@ const reservation = async (req, res) => {
       }
     }
 
-    const reservation = await Reservation.create({
+    const myreservation = await Reservation.create({
       userId: customer.id,
       propertyId: propertyId,
       paymentMethodId: 1,
@@ -366,7 +366,7 @@ const reservation = async (req, res) => {
     
     await Notification.create({
       userId: customer.id,
-      reservationId: reservation.id,
+      reservationId: myreservation.id,
       message: `Votre réservation de logement a été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !`
     });
     

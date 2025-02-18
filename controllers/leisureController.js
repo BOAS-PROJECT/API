@@ -129,7 +129,7 @@ const reservation = async (req, res) => {
     }
 
 
-    const reservation = await Reservation.create({
+    const myreservation = await Reservation.create({
       userId: customer.id,
       leisureId: leisureId,
       paymentMethodId: 1,
@@ -139,7 +139,7 @@ const reservation = async (req, res) => {
 
     await Notification.create({
       userId: customer.id,
-      reservationId: reservation.id,
+      reservationId: myreservation.id,
       message: `Votre réservation de ${leisure.title} a été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !`,
     });
     
