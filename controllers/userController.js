@@ -9,6 +9,8 @@ const {
   Reservation,
   Car,
   Driver,
+  CarImage,
+  CarMovingImage,
   Pharmacy,
   Tourism,
   Leisure,
@@ -540,10 +542,16 @@ const reservationlist = async (req, res) => {
           attributes: [
             "cityId",
             "name",
-            "image",
             "priceWithoutDriver",
             "priceWithDriver",
             "licensePlate",
+          ],
+          include: [
+            {
+              model: CarImage,
+              attributes: ["image"],
+              as: "images",
+            },
           ],
           required: false,
         },
@@ -564,7 +572,13 @@ const reservationlist = async (req, res) => {
         },
         {
           model: CarMoving,
-          attributes: ["cityId", "name", "image", "price", "licensePlate"],
+          attributes: ["cityId", "name", "price", "licensePlate"],
+          include: [
+            {
+              model: CarMovingImage,
+              attributes: ["image"],
+            },
+          ],
           required: false,
         },
         {
@@ -586,14 +600,14 @@ const reservationlist = async (req, res) => {
       if (reservation.Car) {
         carDetails = {
           véhicule: reservation.Car.name,
-          imageCar: reservation.Car.image,
+          imageCar: reservation.Car.images ? reservation.Car.images[0].image : null,
           tarif:
             reservation.type === 1
               ? reservation.Car.priceWithoutDriver
               : reservation.Car.priceWithDriver,
           immatriculation: reservation.Car.licensePlate,
         };
-        state = 7; 
+        state = 7;
       }
 
       if (reservation.Tourism) {
@@ -656,7 +670,7 @@ const reservationlist = async (req, res) => {
         details = {
           cityId: reservation.CarMoving.cityId,
           véhicule: reservation.CarMoving.name,
-          imageCar: reservation.CarMoving.image,
+          imageCar: reservation.CarMoving.CarMovingImages ? reservation.CarMoving.CarMovingImages[0].image : null,
           tarif: reservation.CarMoving.price,
           immatriculation: reservation.CarMoving.licensePlate,
         };
@@ -676,13 +690,14 @@ const reservationlist = async (req, res) => {
         year: "numeric",
       });
 
-      if (status === 0) {
+      let statusText = "";
+      if (reservation.status === 0) {
         statusText = "Annulé";
-      } else if (status === 2) {
+      } else if (reservation.status === 2) {
         statusText = "Confirmée";
-      } else{
+      } else {
         statusText = "En attente de validation";
-      }  
+      }
 
       return {
         id: reservation.id,
