@@ -169,9 +169,10 @@ const listWithDriver = async (req, res) => {
   try {
     const cityid = req.headers.cityid;
     if (!cityid) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "ID de la ville est obligatoire." });
+      return res.status(400).json({
+        status: "error",
+        message: "ID de la ville est obligatoire.",
+      });
     }
 
     const cars = await Car.findAll({
@@ -197,20 +198,27 @@ const listWithDriver = async (req, res) => {
         {
           model: CarImage,
           attributes: ["image"],
-          as: "images",
+          as: "images", // Utilisation de l'alias correct
         },
       ],
       order: [["name", "DESC"]],
     });
 
+    // Vérification si cars est un tableau avant d'appliquer map()
+    if (!Array.isArray(cars)) {
+      return res.status(500).json({
+        status: "error",
+        message: "Erreur lors de la récupération des voitures.",
+      });
+    }
+
     // Formatter la réponse
     const responseFormat = cars.map((car) => ({
       id: car.id,
-      model: car.CarMake.name,
+      model: car.CarMake?.name || "Inconnu", // Sécurité si CarMake est null
       name: car.name,
-      images: car.CarImages.map(image => image.image),
+      images: car.images?.map((image) => image.image) || [], // Prend en compte l'alias "images"
       price: car.priceWithDriver,
-      model: car.model,
       year: car.year,
       seats: car.seats,
       transmission: car.transmission,
@@ -221,7 +229,7 @@ const listWithDriver = async (req, res) => {
       cautionFuelWithoutDriver: car.priceFuelWithoutDriver,
       descriptionWithoutDriver: car.descriptionWithoutDriver,
       descriptionWithDriver: car.descriptionWithDriver,
-      averageRating: parseFloat(car.getDataValue("averageRating")),
+      averageRating: parseFloat(car.getDataValue("averageRating")) || 5, // Sécurité contre les valeurs nulles
     }));
 
     return res.status(200).json({
@@ -231,11 +239,9 @@ const listWithDriver = async (req, res) => {
   } catch (error) {
     console.error(`ERROR LIST CAR WITH DRIVER: ${error}`);
     appendErrorLog(`ERROR LIST CAR WITH DRIVER: ${error}`);
-    return res
-      .status(500)
-      .json({
-        error: "Une erreur s'est produite lors de la création de la voiture.",
-      });
+    return res.status(500).json({
+      error: "Une erreur s'est produite lors de la récupération des voitures.",
+    });
   }
 };
 
@@ -243,9 +249,10 @@ const listWithoutDriver = async (req, res) => {
   try {
     const cityid = req.headers.cityid;
     if (!cityid) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "ID de la ville est obligatoire." });
+      return res.status(400).json({
+        status: "error",
+        message: "ID de la ville est obligatoire.",
+      });
     }
 
     const cars = await Car.findAll({
@@ -271,20 +278,27 @@ const listWithoutDriver = async (req, res) => {
         {
           model: CarImage,
           attributes: ["image"],
-          as: "images",
+          as: "images", // Utilisation de l'alias correct
         },
       ],
       order: [["name", "DESC"]],
     });
 
+    // Vérification si cars est un tableau avant d'appliquer map()
+    if (!Array.isArray(cars)) {
+      return res.status(500).json({
+        status: "error",
+        message: "Erreur lors de la récupération des voitures.",
+      });
+    }
+
     // Formatter la réponse
     const responseFormat = cars.map((car) => ({
       id: car.id,
-      model: car.CarMake.name,
+      model: car.CarMake?.name || "Inconnu", // Sécurité si CarMake est null
       name: car.name,
-      images: car.CarImages.map(image => image.image),
+      images: car.images?.map((image) => image.image) || [], // Prend en compte l'alias "images"
       price: car.priceWithDriver,
-      model: car.model,
       year: car.year,
       seats: car.seats,
       transmission: car.transmission,
@@ -295,7 +309,7 @@ const listWithoutDriver = async (req, res) => {
       cautionFuelWithoutDriver: car.priceFuelWithoutDriver,
       descriptionWithoutDriver: car.descriptionWithoutDriver,
       descriptionWithDriver: car.descriptionWithDriver,
-      averageRating: parseFloat(car.getDataValue("averageRating")),
+      averageRating: parseFloat(car.getDataValue("averageRating")) || 5, // Sécurité contre les valeurs nulles
     }));
 
     return res.status(200).json({
@@ -305,11 +319,9 @@ const listWithoutDriver = async (req, res) => {
   } catch (error) {
     console.error(`ERROR LIST CAR WITH DRIVER: ${error}`);
     appendErrorLog(`ERROR LIST CAR WITH DRIVER: ${error}`);
-    return res
-      .status(500)
-      .json({
-        error: "Une erreur s'est produite lors de la création de la voiture.",
-      });
+    return res.status(500).json({
+      error: "Une erreur s'est produite lors de la récupération des voitures.",
+    });
   }
 };
 
