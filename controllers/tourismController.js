@@ -210,6 +210,19 @@ const reservation = async (req, res) => {
         .json({ status: "error", message: "Le logement n'existe pas." });
     }
 
+
+    if (customer.token) {
+      const message = {
+        notification: { title: "Félicitations 🎉", body: `Votre réservation de site touristique a été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !` },
+        token: customer.token,
+      };
+      try {
+        await admin.messaging().send(message);
+      } catch (error) {
+        console.error("Échec de l'envoi de la notification de succès:", error);
+      }
+    }
+
     await Reservation.create({
       userId: customer.id,
       tourismId: tourismId,
@@ -217,24 +230,6 @@ const reservation = async (req, res) => {
       date,
       status: 1,
     });
-
-    if (customer.token) {
-      const userToken = customer.token;
-      const message = {
-        token: userToken,
-        notification: {
-          title: "Félicitations!",
-          body: `Votre reservation du site touristique a bien ete prise en compte.`,
-        },
-      };
-
-      try {
-        await admin.messaging().send(message);
-        console.log(`Notification envoyée à l'utilisateur avec le token : ${userToken}`);
-      } catch (error) {
-        console.error(`Erreur lors de l'envoi de la notification : ${error.message}`);
-      }
-    }
 
     return res.status(201).json({
       status: "success",

@@ -116,6 +116,19 @@ const reservation = async (req, res) => {
         .json({ status: "error", message: "Le loisir n'existe pas." });
     }
 
+    if (customer.token) {
+      const message = {
+        notification: { title: "Félicitations 🎉", body: `Votre réservation de ${leisure.title} a été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !` },
+        token: customer.token,
+      };
+      try {
+        await admin.messaging().send(message);
+      } catch (error) {
+        console.error("Échec de l'envoi de la notification de succès:", error);
+      }
+    }
+
+
     await Reservation.create({
       userId: customer.id,
       leisureId: leisureId,
@@ -123,25 +136,7 @@ const reservation = async (req, res) => {
       date,
       status: 1,
     });
-
-    if (customer.token) {
-      const userToken = customer.token;
-      const message = {
-        token: userToken,
-        notification: {
-          title: "Félicitations!",
-          body: `Votre réservation de ${leisure.title} a bien été prise en compte.`,
-        },
-      };
-
-      try {
-        await admin.messaging().send(message);
-        console.log(`Notification envoyée à l'utilisateur avec le token : ${userToken}`);
-      } catch (error) {
-        console.error(`Erreur lors de l'envoi de la notification : ${error.message}`);
-      }
-    }
-
+    
     return res.status(201).json({
       status: "success",
       message: "Votre réservation à été prise en charge avec succès, veuillez vous rendre dans votre historique vous pouvez réserver un véhicule ou modifier."
