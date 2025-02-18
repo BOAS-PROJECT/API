@@ -823,32 +823,23 @@ const cancelReservation = async (req, res) => {
       });
     }
 
+     // Envoyer une notification à l'utilisateur
+     if (reservation.User.token) {
+      const message = {
+        notification: { title: "Réservation annulée", body: `Votre réservation en date du ${new Date(reservation.date).toLocaleString("fr-FR")} a été annulée avec succès.` },
+        token: reservation.User.token,
+      };
+      try {
+        await admin.messaging().send(message);
+      } catch (error) {
+        console.error("Échec de l'envoi de la notification de succès:", error);
+      }
+    }
+
+
     // Mettre à jour le statut de la réservation à Annulé
     reservation.status = 0;
     await reservation.save();
-
-    // Envoyer une notification à l'utilisateur
-    if (reservation.User.token) {
-      const message = {
-        notification: {
-          title: "Réservation annulée",
-          body: `Votre réservation en date du ${new Date(
-            reservation.date
-          ).toLocaleString("fr-FR")} a été annulée avec succès.`,
-        },
-        token: reservation.User.token,
-      };
-
-      await admin
-        .messaging()
-        .send(message)
-        .then((response) => {
-          console.log("Notification d'annulation envoyée :", response);
-        })
-        .catch((error) => {
-          console.error("Erreur lors de l'envoi de la notification :", error);
-        });
-    }
 
     return res.status(200).json({
       status: "success",
@@ -931,30 +922,23 @@ const deleteReservation = async (req, res) => {
       });
     }
 
-    // Annuler la réservation
-    reservation.isShow = false;
-    await reservation.save();
 
     // Envoyer une notification à l'utilisateur
     if (reservation.User.token) {
       const message = {
-        notification: {
-          title: "Réservation supprimée",
-          body: `Votre réservation a été supprimée avec succès.`,
-        },
+        notification: { title: "Réservation supprimée", body: `Votre réservation a été supprimée avec succès.` },
         token: reservation.User.token,
       };
-
-      await admin
-        .messaging()
-        .send(message)
-        .then((response) => {
-          console.log("Notification d'annulation envoyée :", response);
-        })
-        .catch((error) => {
-          console.error("Erreur lors de l'envoi de la notification :", error);
-        });
+      try {
+        await admin.messaging().send(message);
+      } catch (error) {
+        console.error("Échec de l'envoi de la notification de succès:", error);
+      }
     }
+
+    // Annuler la réservation
+    reservation.isShow = false;
+    await reservation.save();
 
     return res.status(200).json({
       status: "success",
