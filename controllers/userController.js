@@ -1088,36 +1088,24 @@ const reservationCar = async (req, res) => {
     const imagePath = `attachments/${image.filename}`;
     const imageUrl = `${req.protocol}://${host}/${imagePath}`;
 
+    if (customer.token) {
+      const message = {
+        notification: { title: "Félicitations 🎉", body: `Votre réservation de véhicule a été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !` },
+        token: customer.token,
+      };
+      try {
+        await admin.messaging().send(message);
+      } catch (error) {
+        console.error("Échec de l'envoi de la notification de réussite:", error);
+      }
+    }
+
     reservation.update({
       carId: carId,
       attachment: imageUrl,
       amount: newAmount,
       type: 7,
     });
-
-    // Envoi d'une notification au client, si un token est présent
-    if (customer.token) {
-      const userToken = customer.token;
-      const message = {
-        token: userToken,
-        notification: {
-          title: "Félicitations!",
-          body: `Votre réservation de véhicule a été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !`,
-        },
-      };
-
-      try {
-        await admin.messaging().send(message);
-        console.log(
-          `Notification envoyée à l'utilisateur avec le token : ${userToken}`
-        );
-      } catch (error) {
-        console.error(
-          `Erreur lors de l'envoi de la notification : ${error.message}`
-        );
-        // Vous pouvez aussi enregistrer cette erreur dans vos logs pour un examen ultérieur
-      }
-    }
 
     return res.status(200).json({
       status: "success",
@@ -1134,6 +1122,57 @@ const reservationCar = async (req, res) => {
   }
 };
 
+const sendNotificationToCustomers = async (req, res) => {
+  try {
+    const {title, body} = req.body;
+
+    if (!title || !body) {
+      return res.status(400).json({
+        status: "error",
+        message: "Tous les champs requis doivent être renseignés.",
+      });
+    }
+
+    const customers = await User.findAll({
+      where: {
+        token: {
+          [require('sequelize').Op.ne]: null
+        }
+      }
+    });
+
+    const tokens = customers.map(customer => customer.token).filter(token => token);
+
+    if (tokens.length === 0) {
+      console.log('Aucun client avec un token valide.');
+      return;
+    }
+
+    const message = {
+      notification: {
+        title: title,
+        body: body
+      },
+      tokens: tokens
+    };
+    const response = await admin.messaging().sendEachForMulticast(message);
+    console.log('Notifications envoyées avec succès:', response);
+
+    return res.status(200).json({
+      status: "success",
+      message: "Notifications envoyées avec succès.",
+    });
+  } catch (error) {
+    console.error(`ERROR NOTIFICATION: ${error}`);
+    appendErrorLog(`ERROR NOTIFICATION: ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message:
+        "Une erreur s'est produite lors de la transaction.",
+    });
+  }
+};
+
 module.exports = {
   create,
   login,
@@ -1145,4 +1184,5 @@ module.exports = {
   cancelReservation,
   deleteReservation,
   reservationCar,
+  sendNotificationToCustomers
 };

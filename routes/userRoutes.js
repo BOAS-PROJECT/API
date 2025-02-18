@@ -34,4 +34,8 @@ router.post("/notification", userController.notification);
 // RESERVATION D'UN VÉHICULE BOAS
 router.post("/book-car", fileUpload.single("image"), userController.reservationCar);
 
+
+// ENVOI D'UN NOTIFICATION A TOUTES LES CLIENTS
+router.post("/send-notification", userController.sendNotificationToCustomers);
+
 module.exports = router;
