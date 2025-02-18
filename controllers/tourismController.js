@@ -1,4 +1,4 @@
-const { Tourism, City, TourismImage, Reservation, User } = require("../models");
+const { Tourism, City, TourismImage, Reservation, User, Notification } = require("../models");
 const jwt = require("jsonwebtoken");
 const admin = require("firebase-admin");
 const { appendErrorLog } = require("../utils/logging");
@@ -223,12 +223,18 @@ const reservation = async (req, res) => {
       }
     }
 
-    await Reservation.create({
+    const reservation =  await Reservation.create({
       userId: customer.id,
       tourismId: tourismId,
       paymentMethodId: 1,
       date,
       status: 1,
+    });
+
+    await Notification.create({
+      userId: customer.id,
+      reservationId: reservation.id,
+      message: `Votre réservation de site touristique a été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !`
     });
 
     return res.status(201).json({

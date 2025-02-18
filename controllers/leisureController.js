@@ -1,4 +1,4 @@
-const { Leisure, LeisureImage, Reservation, User, City } = require("../models");
+const { Leisure, LeisureImage, Reservation, User, City, Notification } = require("../models");
 const jwt = require("jsonwebtoken");
 const admin = require("firebase-admin");
 const { appendErrorLog } = require("../utils/logging");
@@ -129,12 +129,18 @@ const reservation = async (req, res) => {
     }
 
 
-    await Reservation.create({
+    const reservation = await Reservation.create({
       userId: customer.id,
       leisureId: leisureId,
       paymentMethodId: 1,
       date,
       status: 1,
+    });
+
+    await Notification.create({
+      userId: customer.id,
+      reservationId: reservation.id,
+      message: `Votre réservation de ${leisure.title} a été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !`,
     });
     
     return res.status(201).json({
@@ -142,8 +148,8 @@ const reservation = async (req, res) => {
       message: "Votre réservation à été prise en charge avec succès, veuillez vous rendre dans votre historique vous pouvez réserver un véhicule ou modifier."
     });
   } catch (error) {
-    console.error(`ERROR RESERVATION CARMOVING: ${error}`);
-    appendErrorLog(`ERROR RESERVATION CARMOVING: ${error}`);
+    console.error(`ERROR RESERVATION LEISURE: ${error}`);
+    appendErrorLog(`ERROR RESERVATION LEISURE: ${error}`);
     return res.status(500).json({
       status: "error",
       message: "Une erreur s'est produite lors de la creation du compte.",

@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       this.hasMany(models.Owner, { foreignKey: 'driverId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.hasMany(models.Reservation, { foreignKey: 'driverId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      this.hasMany(models.Notification, { foreignKey: 'userId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
     }
   }
   Driver.init({

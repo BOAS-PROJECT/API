@@ -8,6 +8,7 @@ const {
   Car,
   PaymentMethod,
   Reservation,
+  Notification
 } = require("../models");
 const jwt = require("jsonwebtoken");
 const admin = require("firebase-admin");
@@ -354,13 +355,19 @@ const reservation = async (req, res) => {
       }
     }
 
-    await Reservation.create({
+    const reservation = await Reservation.create({
       userId: customer.id,
       propertyId: propertyId,
       paymentMethodId: 1,
       date,
       days,
       status: 1,
+    });
+    
+    await Notification.create({
+      userId: customer.id,
+      reservationId: reservation.id,
+      message: `Votre réservation de logement a été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !`
     });
     
     return res.status(201).json({

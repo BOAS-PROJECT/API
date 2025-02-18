@@ -1,4 +1,4 @@
-const { Car, CarMake, CarImage, Rating, User, PaymentMethod, Reservation } = require("../models");
+const { Car, CarMake, CarImage, Rating, User, PaymentMethod, Reservation, Notification } = require("../models");
 const sequelize = require("sequelize");
 const jwt = require("jsonwebtoken");
 const admin = require("firebase-admin");
@@ -198,7 +198,7 @@ const listWithDriver = async (req, res) => {
         {
           model: CarImage,
           attributes: ["image"],
-          as: "images", // Utilisation de l'alias correct
+          as: "images",
         },
       ],
       order: [["name", "DESC"]],
@@ -215,9 +215,9 @@ const listWithDriver = async (req, res) => {
     // Formatter la réponse
     const responseFormat = cars.map((car) => ({
       id: car.id,
-      model: car.CarMake?.name || "Inconnu", // Sécurité si CarMake est null
+      model: car.CarMake?.name || "Inconnu",
       name: car.name,
-      images: car.images?.map((image) => image.image) || [], // Prend en compte l'alias "images"
+      images: car.images?.map((image) => image.image) || [],
       price: car.priceWithDriver,
       year: car.year,
       seats: car.seats,
@@ -229,7 +229,7 @@ const listWithDriver = async (req, res) => {
       cautionFuelWithoutDriver: car.priceFuelWithoutDriver,
       descriptionWithoutDriver: car.descriptionWithoutDriver,
       descriptionWithDriver: car.descriptionWithDriver,
-      averageRating: parseFloat(car.getDataValue("averageRating")) || 5, // Sécurité contre les valeurs nulles
+      averageRating: parseFloat(car.getDataValue("averageRating")) || 5,
     }));
 
     return res.status(200).json({
@@ -278,7 +278,7 @@ const listWithoutDriver = async (req, res) => {
         {
           model: CarImage,
           attributes: ["image"],
-          as: "images", // Utilisation de l'alias correct
+          as: "images",
         },
       ],
       order: [["name", "DESC"]],
@@ -295,9 +295,9 @@ const listWithoutDriver = async (req, res) => {
     // Formatter la réponse
     const responseFormat = cars.map((car) => ({
       id: car.id,
-      model: car.CarMake?.name || "Inconnu", // Sécurité si CarMake est null
+      model: car.CarMake?.name || "Inconnu",
       name: car.name,
-      images: car.images?.map((image) => image.image) || [], // Prend en compte l'alias "images"
+      images: car.images?.map((image) => image.image) || [],
       price: car.priceWithDriver,
       year: car.year,
       seats: car.seats,
@@ -309,7 +309,7 @@ const listWithoutDriver = async (req, res) => {
       cautionFuelWithoutDriver: car.priceFuelWithoutDriver,
       descriptionWithoutDriver: car.descriptionWithoutDriver,
       descriptionWithDriver: car.descriptionWithDriver,
-      averageRating: parseFloat(car.getDataValue("averageRating")) || 5, // Sécurité contre les valeurs nulles
+      averageRating: parseFloat(car.getDataValue("averageRating")) || 5,
     }));
 
     return res.status(200).json({
@@ -426,7 +426,7 @@ const reservation = async (req, res) => {
       }
     }
 
-    await Reservation.create({
+   const reservation =  await Reservation.create({
       userId: customer.id,
       carId: carId,
       paymentMethodId: payment,
@@ -436,6 +436,12 @@ const reservation = async (req, res) => {
       status: 1,
       type: 0,
       attachment: imageUrl,
+    });
+
+    await Notification.create({
+      userId: customer.id,
+      reservationId: reservation.id,
+      message: `Votre réservation de véhicule a été prise en compte avec succès. Rendez-vous à l'agence pour finaliser le paiement et récupérer votre véhicule. Merci de votre confiance !`,
     });
 
     return res.status(201).json({
