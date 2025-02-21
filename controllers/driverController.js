@@ -1,11 +1,12 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const { Driver } = require("../models");
+const { Driver, City } = require("../models");
 const { appendErrorLog } = require("../utils/logging");
 
 const create = async (req, res) => {
   try {
     const {
+      cityId,
       firstName,
       lastName,
       status,
@@ -72,6 +73,22 @@ const create = async (req, res) => {
       });
     }
 
+    
+    if (!cityId) {
+      return res
+        .status(400)
+        .json({ error: "La ville est de résidence obligatoire." });
+    }
+
+    const existingCity = await City.findByPk(cityId)
+    if (existingCity) {
+      return res.status(400).json({
+        status: "error",
+        message: "La ville n'existe pas.",
+      });
+    }
+
+
     const existingDriver = await Driver.findOne({ where: { phone } });
     if (existingDriver) {
       return res.status(400).json({
@@ -91,6 +108,7 @@ const create = async (req, res) => {
     }
     
    const driver =  await Driver.create({
+      cityId,
       firstName,
       lastName,
       maritalStatus: status,
@@ -116,8 +134,7 @@ const create = async (req, res) => {
 
     return res.status(201).json({
       status: "success",
-      message:
-        "otre compte a été créé avec succès et est actuellement en attente de validation. Nous vous invitons à vous rendre à l'agence BOAS Service pour finaliser la vérification de votre compte.",
+      message: "Votre compte a été créé avec succès et est actuellement en attente de validation. Nous vous invitons à vous rendre à l'agence BOAS Service pour finaliser la vérification de votre compte.",
       data: responseFormated,
     });
   } catch (error) {
@@ -271,7 +288,7 @@ const login = async (req, res) => {
           role: "isDriver",
         },
         process.env.JWT_SECRET
-      );
+    );
 
     const response = {
       firstName: driver.firstName,
