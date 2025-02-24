@@ -106,7 +106,7 @@ const create = async (req, res) => {
       });
     }
     
-   const driver =  await Driver.create({
+   const driveruser =  await Driver.create({
       cityId,
       firstName,
       lastName,
@@ -118,16 +118,16 @@ const create = async (req, res) => {
       quarter,
     });
 
-    const token = jwt.sign({ id: driver.id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: driveruser.id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
-    driver.token = token;
-    await driver.save();
+    driveruser.token = token;
+    await driveruser.save();
 
     const responseFormated = {
-      firstName: driver.firstName,
-      lastName: driver.lastName,
+      firstName: driveruser.firstName,
+      lastName: driveruser.lastName,
       token: token,
     };
 
