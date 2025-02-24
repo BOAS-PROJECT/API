@@ -17,4 +17,10 @@ router.get("/list-active-drivers", driverController.listActiveDrivers);
 // LISTE DES CONDUCTEURS ACTIFS
 router.get("/list-inactive-drivers", driverController.listInActiveDrivers);
 
+// MISE A JOUR DU TOKEN
+router.put("/update-token", driverController.updateToken);
+
+// UPLOAD DE LA PHOTO
+router.put("/upload-photo", driverController.uploadPhoto);
+
 module.exports = router;
