@@ -126,6 +126,7 @@ const create = async (req, res) => {
     const responseFormated = {
       firstName: driveruser.firstName,
       lastName: driveruser.lastName,
+      status: 'isPending',
       token: token,
     };
 
