@@ -94,6 +94,14 @@ const createAttachmentsFolder = (req, res, next) => {
   next();
 };
 
+const createDriversFolder = (req, res, next) => {
+  const folderPath = "public/drivers";
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath, { recursive: true });
+  }
+  next();
+};
+
 
 // Public directory
 app.use(express.static("public"));
@@ -126,7 +134,7 @@ app.use(
 
 // Routes
 app.use("/api/v1/user", createUploadsUsersFolder, userRoutes);
-app.use('/api/v1/driver', createUploadsDriverFolder,  driverRoutes);
+app.use('/api/v1/driver', createUploadsDriverFolder, createDriversFolder, driverRoutes);
 app.use('/api/v1/owner', createUploadsOwnersFolder, ownnerRoutes);
 app.use('/api/v1/make', makeRoutes);
 app.use('/api/v1/car', createUploadsCarsFolder, createAttachmentsFolder, carRoutes);
