@@ -480,4 +480,74 @@ const uploadPhoto = async (req, res) => {
   }
 }
 
-module.exports = { create, validateAccount, listActiveDrivers, login, listInActiveDrivers, updateToken, uploadPhoto };
+
+const createPassword = async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+    const { password } = req.body;
+    if (!token) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token non fourni." });
+    }
+
+    if (!password) {
+      return res.status(400).json({
+        status: "error",
+        message: "Le mot de passe est obligatoire.",
+      });
+    }
+
+    // Vérifie si l'en-tête commence par "Bearer "
+    if (!token.startsWith("Bearer ")) {
+      return res.status(401).json({
+        status: "error",
+        message: "Format de token invalide.",
+      });
+    }
+
+    // Extrait le token en supprimant le préfixe "Bearer "
+    const customToken = token.substring(7);
+    let decodedToken;
+
+    try {
+      decodedToken = jwt.verify(customToken, process.env.JWT_SECRET);
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .json({ status: "error", message: "TokenExpiredError" });
+      }
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token invalide." });
+    }
+
+    const driverId = decodedToken.id;
+
+    const driver = await Driver.findByPk(driverId);
+    if (!driver) {
+      return res.status(404).json({
+        status: "error",
+        message:
+          "Compte non trouvé. Veuillez réessayer ou en créer un nouveau.",
+      });
+    }
+
+    driver.password = password;
+    await driver.save();
+    return res.status(200).json({
+      status: "success",
+      message: "Mot de passe mis à jour avec succès.",
+    });
+  } catch (error) {
+    console.error(`ERROR CREATE PASSWORD DRIVER: ${error}`);
+    appendErrorLog(`ERROR CREATE PASSWORD DRIVER: ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message: "Une erreur s'est produite lors de la mise à jour de la photo.",
+    });
+  }
+}
+
+module.exports = { create, validateAccount, listActiveDrivers, login, listInActiveDrivers, updateToken, uploadPhoto, createPassword };

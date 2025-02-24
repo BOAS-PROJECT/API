@@ -24,4 +24,7 @@ router.put("/update-token", driverController.updateToken);
 // UPLOAD DE LA PHOTO
 router.put("/upload-photo", upload.single("photo"), driverController.uploadPhoto);
 
+// CREATE PASSWORD
+router.put("/create-password", driverController.createPassword);
+
 module.exports = router;
