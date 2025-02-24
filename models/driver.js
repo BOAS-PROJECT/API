@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.hasMany(models.Owner, { foreignKey: 'driverId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      //this.hasMany(models.Owner, { foreignKey: 'driverId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.hasMany(models.Reservation, { foreignKey: 'driverId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.hasMany(models.Notification, { foreignKey: 'driverId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.belongsTo(models.City, { foreignKey: 'cityId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
