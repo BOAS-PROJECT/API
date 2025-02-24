@@ -118,9 +118,7 @@ const create = async (req, res) => {
       quarter,
     });
 
-    const token = jwt.sign({ id: driveruser.id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign({ id: driveruser.id }, process.env.JWT_SECRET);
 
     driveruser.token = token;
     await driveruser.save();
