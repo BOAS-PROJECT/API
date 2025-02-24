@@ -80,14 +80,13 @@ const create = async (req, res) => {
         .json({ error: "La ville est de résidence obligatoire." });
     }
 
-    const existingCity = await City.findByPk(cityId)
-    if (existingCity) {
+    const existingCity = await City.findByPk(cityId);
+    if (!existingCity) {
       return res.status(400).json({
         status: "error",
         message: "La ville n'existe pas.",
       });
     }
-
 
     const existingDriver = await Driver.findOne({ where: { phone } });
     if (existingDriver) {
