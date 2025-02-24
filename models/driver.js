@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.Owner, { foreignKey: 'driverId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.hasMany(models.Reservation, { foreignKey: 'driverId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.hasMany(models.Notification, { foreignKey: 'driverId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
-      this.belongsTo(models.City, { foreignKey: 'driverId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      this.belongsTo(models.City, { foreignKey: 'cityId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
     }
   }
   Driver.init({
