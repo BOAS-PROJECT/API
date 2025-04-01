@@ -46,7 +46,7 @@ const create = async (req, res) => {
     }
 
     const existingDistance = await Pricing.findOne({
-      where: { distance, type, city },
+      where: { distance, type, cityId: city },
     });
     if (existingDistance) {
       return res
@@ -55,7 +55,7 @@ const create = async (req, res) => {
     }
     await Pricing.create({
       type,
-      city,
+      cityId: city,
       distance,
       price,
       priceMax1,
@@ -67,6 +67,7 @@ const create = async (req, res) => {
     });
   } catch (error) {
     appendErrorLog(error);
+    console.error("Error creating pricing:", error);
     return res
       .status(500)
       .json({ status: "error", message: "Internal server error" });
@@ -75,17 +76,18 @@ const create = async (req, res) => {
 const getAll = async (req, res) => {
   try {
     const pricing = await Pricing.findAll({
-      attributes: ["id", "type", "distance", "price", "priceMax1", "priceMax2"],
+      attributes: ["type", "distance", "price", "priceMax1", "priceMax2"],
       include: [
         {
           model: City,
-          attributes: ["id", "name"],
+          attributes: ["name"],
         },
       ],
     });
     return res.status(200).json(pricing);
   } catch (error) {
     appendErrorLog(error);
+    console.error("Error fetching pricing:", error);
     return res
       .status(500)
       .json({ status: "error", message: "Internal server error" });
@@ -94,7 +96,13 @@ const getAll = async (req, res) => {
 
 const calculate = async (req, res) => {
   try {
-    const { type, distance } = req.body;
+    const { city, type, distance } = req.body;
+
+    if (!city) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "City is required" });
+    }
 
     if (!type) {
       return res
@@ -111,12 +119,13 @@ const calculate = async (req, res) => {
     const pricing = await Pricing.findAll({
       where: {
         type: type,
+        cityId: city,
         distance: {
           [Op.gte]: distance,
         },
       },
-      order: [["distance", "ASC"]], // Trier par distance croissante
-      limit: 1, // Limiter à un seul résultat
+      order: [["distance", "ASC"]],
+      limit: 1,
     });
 
     if (pricing.length === 0) {
@@ -141,6 +150,7 @@ const calculate = async (req, res) => {
     });
   } catch (error) {
     appendErrorLog(error);
+    console.error("Error calculating pricing:", error);
     return res
       .status(500)
       .json({ status: "error", message: "Internal server error" });
