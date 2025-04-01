@@ -11,9 +11,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      this.belongsTo(models.City, { foreignKey: 'cityId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
     }
   }
   Pricing.init({
+    cityId: DataTypes.INTEGER,
     type: DataTypes.INTEGER,
     distance: DataTypes.INTEGER,
     price: DataTypes.DOUBLE,

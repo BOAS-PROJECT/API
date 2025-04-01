@@ -1,10 +1,10 @@
-const { Pricing } = require("../models");
+const { Pricing, City } = require("../models");
 const { Op } = require("sequelize");
 const { appendErrorLog } = require("../utils/logging");
 
 const create = async (req, res) => {
   try {
-    const { type, distance, price, priceMax1, priceMax2 } = req.body;
+    const { city, type, distance, price, priceMax1, priceMax2 } = req.body;
 
     if (!type) {
       return res
@@ -32,9 +32,21 @@ const create = async (req, res) => {
         .status(400)
         .json({ status: "error", message: "PriceMax2 is required" });
     }
+    if (!city) {
+        return res
+        .status(400)
+        .json({ status: "error", message: "City is required" });
+    }
+
+    const existingCity = await City.findByPk(city);
+    if (!existingCity) {
+      return res
+        .status(404)
+        .json({ status: "error", message: "City not found" });
+    }
 
     const existingDistance = await Pricing.findOne({
-      where: { distance },
+      where: { distance, type, city },
     });
     if (existingDistance) {
       return res
@@ -43,6 +55,7 @@ const create = async (req, res) => {
     }
     await Pricing.create({
       type,
+      city,
       distance,
       price,
       priceMax1,
@@ -63,6 +76,12 @@ const getAll = async (req, res) => {
   try {
     const pricing = await Pricing.findAll({
       attributes: ["id", "type", "distance", "price", "priceMax1", "priceMax2"],
+      include: [
+        {
+          model: City,
+          attributes: ["id", "name"],
+        },
+      ],
     });
     return res.status(200).json(pricing);
   } catch (error) {
@@ -115,7 +134,7 @@ const calculate = async (req, res) => {
     return res.status(200).json({
       status: "success",
       data: {
-        amount: selectedPricing.price,
+        amountmax0: selectedPricing.price,
         amountmax1: selectedPricing.priceMax1,
         amountmax2: selectedPricing.priceMax2,
       },
