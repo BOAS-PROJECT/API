@@ -22,6 +22,7 @@ const propertyRoutes = require("./routes/propertyRoutes");
 const tourismeRoutes = require("./routes/tourismeRoutes");
 const leisureRoutes = require("./routes/leisureRoutes");
 const cityRoutes = require("./routes/cityRoutes");
+const pricingRoutes = require("./routes/princingRoutes");
 
 // Init express app
 const app = express();
@@ -144,6 +145,7 @@ app.use('/api/v1/property', createUploadsPropertiesFolder, propertyRoutes);
 app.use('/api/v1/tourism', createTourismPropertiesFolder, tourismeRoutes);
 app.use('/api/v1/leisure', leisureRoutes);
 app.use('/api/v1/city', cityRoutes);
+app.use('/api/v1/pricing', pricingRoutes);
 
 // Sentry
 Sentry.setupExpressErrorHandler(app);
