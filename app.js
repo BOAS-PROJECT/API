@@ -10,9 +10,9 @@ const admin = require("firebase-admin");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const fs = require("fs");
+const http = require("http");
 const WebSocket = require('ws');
 const serviceAccount = require("./utils/firebase.json");
-const { Taxi } = require("../models");
 const userRoutes = require("./routes/userRoutes");
 const driverRoutes = require("./routes/driverRoutes");
 const ownnerRoutes = require("./routes/ownnerRoutes");
@@ -25,7 +25,7 @@ const tourismeRoutes = require("./routes/tourismeRoutes");
 const leisureRoutes = require("./routes/leisureRoutes");
 const cityRoutes = require("./routes/cityRoutes");
 const pricingRoutes = require("./routes/princingRoutes");
-
+const { Taxi } = require("./models");
 // Init express app
 const app = express();
 
