@@ -139,8 +139,8 @@ app.use('/api/v1/pricing', pricingRoutes);
 
 
 // Sentry
-// Sentry
 Sentry.setupExpressErrorHandler(app);
+
 
 // Create HTTP server
 const server = http.createServer(app);
@@ -149,7 +149,10 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 wss.on('connection', (ws) => {
+  console.log('WebSocket client connected');
   ws.on('message', async (message) => {
+    console.log(`Received message: ${message}`);
+    console.error(`Received message: ${message}`);
     const { id, latitude, longitude } = JSON.parse(message);
     try {
       const taxi = await Taxi.findByPk(id);
@@ -166,6 +169,15 @@ wss.on('connection', (ws) => {
     } catch (error) {
       console.error(`ERROR UPDATING LOCATION VIA WEBSOCKET: ${error}`);
     }
+  });
+
+  ws.on('close', () => {
+    console.log('WebSocket client disconnected');
+    console.error('WebSocket client disconnected');
+  });
+
+  ws.on('error', (error) => {
+    console.error(`WebSocket error: ${error}`);
   });
 });
 
