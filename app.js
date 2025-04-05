@@ -10,7 +10,9 @@ const admin = require("firebase-admin");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const fs = require("fs");
+const WebSocket = require('ws');
 const serviceAccount = require("./utils/firebase.json");
+const { Taxi } = require("../models");
 const userRoutes = require("./routes/userRoutes");
 const driverRoutes = require("./routes/driverRoutes");
 const ownnerRoutes = require("./routes/ownnerRoutes");
@@ -121,18 +123,6 @@ app.use(
   helmet.contentSecurityPolicy({ directives: { defaultSrc: ["'self'"] } })
 );
 
-// Permissions policy
-/*
-app.use(
-  permissionsPolicy({
-    features: {
-      payment: ["self", '"nyota-api.com"'],
-      syncXhr: [],
-    },
-  })
-);
-*/
-
 // Routes
 app.use("/api/v1/user", createUploadsUsersFolder, userRoutes);
 app.use('/api/v1/driver', createUploadsDriverFolder, createDriversFolder, driverRoutes);
@@ -147,14 +137,41 @@ app.use('/api/v1/leisure', leisureRoutes);
 app.use('/api/v1/city', cityRoutes);
 app.use('/api/v1/pricing', pricingRoutes);
 
+
+// Sentry
 // Sentry
 Sentry.setupExpressErrorHandler(app);
 
-// Export app
-const port = process.env.PORT || 3000;
+// Create HTTP server
+const server = http.createServer(app);
+
+// WebSocket Server
+const wss = new WebSocket.Server({ server });
+
+wss.on('connection', (ws) => {
+  ws.on('message', async (message) => {
+    const { id, latitude, longitude } = JSON.parse(message);
+    try {
+      const taxi = await Taxi.findByPk(id);
+      if (taxi) {
+        taxi.latitude = latitude;
+        taxi.longitude = longitude;
+        await taxi.save();
+        wss.clients.forEach((client) => {
+          if (client !== ws && client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({ id, latitude, longitude }));
+          }
+        });
+      }
+    } catch (error) {
+      console.error(`ERROR UPDATING LOCATION VIA WEBSOCKET: ${error}`);
+    }
+  });
+});
 
 // Start server
-app.listen(port, () => {
+const port = process.env.PORT || 3000;
+server.listen(port, () => {
   console.log(`
     ==================================
     |🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀|

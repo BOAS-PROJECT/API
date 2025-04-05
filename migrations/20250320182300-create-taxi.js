@@ -44,6 +44,16 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
+      driverId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'Drivers',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      },
       numberChassi: {
         type: Sequelize.STRING,
         allowNull: false
@@ -63,6 +73,24 @@ module.exports = {
       order: {
         type: Sequelize.INTEGER,
         allowNull: true
+      },
+      latitude: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+      },
+      longitude: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+      },
+      isAvailable: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+      },
+      isOnline: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
       },
       createdAt: {
         allowNull: false,

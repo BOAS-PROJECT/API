@@ -4,6 +4,18 @@ const jwt = require("jsonwebtoken");
 const admin = require("firebase-admin");
 const { appendErrorLog } = require("../utils/logging");
 
+
+const location = async (req, res) => {
+  try {
+    
+  } catch (error) {
+    console.error(`ERROR GET LOCATION: ${error}`);
+    appendErrorLog(`ERROR GET LOCATION: ${error}`);
+    return res.status(500).json({
+      error: "Une erreur s'est produite lors de la recherche de la localisation.",
+    });
+  }
+}
 const create = async (req, res) => {
   try {
     const host = req.get("host");

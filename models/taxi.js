@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.City, { foreignKey: 'cityId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.belongsTo(models.CarMake, { foreignKey: 'makeId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
       this.belongsTo(models.Owner, { foreignKey: 'ownerId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+      this.belongsTo(models.Driver, { foreignKey: 'driverId' }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' });
     }
   }
   Taxi.init({
@@ -21,11 +22,16 @@ module.exports = (sequelize, DataTypes) => {
     cityId: DataTypes.INTEGER,
     makeId: DataTypes.INTEGER,
     ownerId: DataTypes.INTEGER,
+    driverId: DataTypes.INTEGER,
     numberChassi: DataTypes.STRING,
     numberCartegrise: DataTypes.STRING,
     licensePlate: DataTypes.STRING,
     image: DataTypes.STRING,
-    order: DataTypes.INTEGER
+    order: DataTypes.INTEGER,
+    latitude: DataTypes.FLOAT,
+    longitude: DataTypes.FLOAT,
+    isAvailable: DataTypes.BOOLEAN,
+    isOnline: DataTypes.BOOLEAN,
   }, {
     sequelize,
     modelName: 'Taxi',
