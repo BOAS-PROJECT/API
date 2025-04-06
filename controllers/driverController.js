@@ -6,6 +6,81 @@ const multer = require("multer");
 const { Driver, City } = require("../models");
 const { appendErrorLog } = require("../utils/logging");
 
+const login = async (req, res) => {
+  try {
+    const { phone, password } = req.body;
+    if (!phone) {
+      return res.status(400).json({
+        status: "error",
+        message: "Le numéro de téléphone est obligatoire.",
+      });
+    }
+
+    if (!password) {
+      return res.status(400).json({
+        status: "error",
+        message: "Le mot de passe est obligatoire.",
+      });
+    }
+
+    const existingDriver = await Driver.findOne({ where: { phone, isActive: false } });
+    if (existingDriver) {
+      return res.status(400).json({
+        status: "error",
+        message: "Votre compte a bien été créé et est en attente de validation. Merci de vous présenter à l'agence BOAS Service pour finaliser la vérification et l'activation de votre compte.",
+      })
+    }
+
+    const driver = await Driver.findOne({ where: { phone, isActive: true } });
+    if (!driver) {
+      return res.status(400).json({
+        status: "error",
+        message:
+          "Le compte n'existe pas, veuillez vous inscrire s'il vous plais.",
+      });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, driver.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({
+        status: "error",
+        message: "Mot de passe invalide.",
+      });
+    }
+
+    const token = jwt.sign(
+        {
+          id: driver.id,
+          role: "isDriver",
+        },
+        process.env.JWT_SECRET
+    );
+
+    const response = {
+      firstName: driver.firstName,
+      lastName: driver.lastName,
+      phone: driver.phone,
+      photo: driver.photo,
+      thumbnail: driver.thumbnail,
+      city: driver.city,
+      token: token
+    };
+
+    return res.status(200).json({
+      status: "success",
+      data: response,
+    });
+  } catch (error) {
+    console.error(`ERROR LOGIN DRIVER: ${error}`);
+    appendErrorLog(`ERROR LOGIN DRIVER: ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message: "Une erreur s'est produite lors de la creation du compte.",
+    });
+  }
+};
+
+
 const create = async (req, res) => {
   try {
     const {
@@ -242,82 +317,6 @@ const listInActiveDrivers = async (req, res) => {
   }
 };
 
-const login = async (req, res) => {
-  try {
-    const { phone, password } = req.body;
-    if (!phone) {
-      return res.status(400).json({
-        status: "error",
-        message: "Le numéro de téléphone est obligatoire.",
-      });
-    }
-
-    if (!password) {
-      return res.status(400).json({
-        status: "error",
-        message: "Le mot de passe est obligatoire.",
-      });
-    }
-
-    if (password.length < 4) {
-      return res.status(400).json({
-        status: "error",
-        message: "Le mot de passe doit avoir au moins 4 caractères.",
-      });
-    }
-
-    const existingDriver = await Driver.findOne({ where: { phone, isActive: false } });
-    if (existingDriver) {
-      return res.status(400).json({
-        status: "error",
-        message: "Votre compte a bien été créé et est en attente de validation. Merci de vous présenter à l'agence BOAS Service pour finaliser la vérification et l'activation de votre compte.",
-      })
-    }
-
-    const driver = await Driver.findOne({ where: { phone, isActive: true } });
-    if (!driver) {
-      return res.status(400).json({
-        status: "error",
-        message:
-          "Le compte n'existe pas, veuillez vous inscrire s'il vous plais.",
-      });
-    }
-
-    const token = jwt.sign(
-        {
-          id: driver.id,
-          role: "isDriver",
-        },
-        process.env.JWT_SECRET
-    );
-
-    const response = {
-      firstName: driver.firstName,
-      lastName: driver.lastName,
-      maritalStatus: driver.maritalStatus,
-      numberPlate: driver.numberPlate,
-      phone: driver.phone,
-      birthday: driver.birthday,
-      city: driver.city,
-      quarter: driver.quarter,
-      photo: driver.photo,
-      thumbnail: driver.thumbnail,
-      token: token
-    };
-
-    return res.status(200).json({
-      status: "success",
-      data: response,
-    });
-  } catch (error) {
-    console.error(`ERROR LOGIN DRIVER: ${error}`);
-    appendErrorLog(`ERROR LOGIN DRIVER: ${error}`);
-    return res.status(500).json({
-      status: "error",
-      message: "Une erreur s'est produite lors de la creation du compte.",
-    });
-  }
-};
 
 const updateToken = async (req, res) => {
   try {
