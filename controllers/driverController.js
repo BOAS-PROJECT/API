@@ -64,6 +64,7 @@ const login = async (req, res) => {
       photo: driver.photo,
       thumbnail: driver.thumbnail,
       city: driver.city,
+      plate: driver.numberPlate,
       token: token
     };
 
@@ -236,6 +237,7 @@ const create = async (req, res) => {
       photo: driveruser.photo,
       thumbnail: driveruser.thumbnail,
       city: driveruser.cityId,
+      plate: driveruser.numberPlate,
       token: token
     };
 
