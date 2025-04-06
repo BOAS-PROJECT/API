@@ -225,8 +225,6 @@ const create = async (req, res) => {
     });
 
     const token = jwt.sign({ id: driveruser.id }, process.env.JWT_SECRET);
-
-    driveruser.token = token;
     await driveruser.save();
 
     const responseFormated = {
@@ -235,7 +233,7 @@ const create = async (req, res) => {
       phone: driveruser.phone,
       photo: driveruser.photo,
       thumbnail: driveruser.thumbnail,
-      city: driveruser.city,
+      city: driveruser.cityId,
       token: token
     };
 
@@ -243,7 +241,6 @@ const create = async (req, res) => {
       status: "success",
       message: "Votre compte a été créé avec succès et est actuellement en attente de validation. Nous vous invitons à vous rendre à l'agence BOAS Service pour finaliser la vérification de votre compte.",
       data: responseFormated,
-      token: token,
     });
   } catch (error) {
     console.error(`ERROR CREATE ACCOUNT DRIVER: ${error}`);
