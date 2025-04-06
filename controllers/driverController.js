@@ -23,12 +23,15 @@ const login = async (req, res) => {
       });
     }
 
-    const existingDriver = await Driver.findOne({ where: { phone, isActive: false } });
+    const existingDriver = await Driver.findOne({
+      where: { phone, isActive: false },
+    });
     if (existingDriver) {
       return res.status(400).json({
         status: "error",
-        message: "Votre compte a bien été créé et est en attente de validation. Merci de vous présenter à l'agence BOAS Service pour finaliser la vérification et l'activation de votre compte.",
-      })
+        message:
+          "Votre compte a bien été créé et est en attente de validation. Merci de vous présenter à l'agence BOAS Service pour finaliser la vérification et l'activation de votre compte.",
+      });
     }
 
     const driver = await Driver.findOne({ where: { phone, isActive: true } });
@@ -49,11 +52,11 @@ const login = async (req, res) => {
     }
 
     const token = jwt.sign(
-        {
-          id: driver.id,
-          role: "isDriver",
-        },
-        process.env.JWT_SECRET
+      {
+        id: driver.id,
+        role: "isDriver",
+      },
+      process.env.JWT_SECRET
     );
 
     const response = {
@@ -65,7 +68,7 @@ const login = async (req, res) => {
       thumbnail: driver.thumbnail,
       city: driver.city,
       plate: driver.numberPlate,
-      token: token
+      token: token,
     };
 
     return res.status(200).json({
@@ -81,7 +84,6 @@ const login = async (req, res) => {
     });
   }
 };
-
 
 const create = async (req, res) => {
   try {
@@ -113,7 +115,6 @@ const create = async (req, res) => {
       });
     }
 
-
     if (!phone) {
       return res.status(400).json({
         status: "error",
@@ -121,7 +122,6 @@ const create = async (req, res) => {
       });
     }
 
-  
     if (!plate) {
       return res.status(400).json({
         status: "error",
@@ -150,14 +150,12 @@ const create = async (req, res) => {
       });
     }
 
-
     if (!birth_date) {
       return res.status(400).json({
         status: "error",
         message: "La date de naissance est obligatoire.",
       });
     }
-
 
     if (!password) {
       return res.status(400).json({
@@ -172,7 +170,6 @@ const create = async (req, res) => {
         message: "Le mot de passe doit contenir au moins 4 caractères.",
       });
     }
-
 
     const existingCity = await City.findByPk(city_id);
     if (!existingCity) {
@@ -200,25 +197,27 @@ const create = async (req, res) => {
       });
     }
 
-     // Générez et enregistrez l'image et le thumbnail
-     const imagePath = `drivers/${photo.filename}`;
-     const imageUrl = `${req.protocol}://${host}/${imagePath}`;
-     const thumbnailFilename = `thumb_${photo.filename}`;
-     const thumbnailPath = `drivers/${thumbnailFilename}`;
-     const thumbnailUrl = `${req.protocol}://${host}/${thumbnailPath}`;
+    // Générez et enregistrez l'image et le thumbnail
+    const imagePath = `drivers/${photo.filename}`;
+    const imageUrl = `${req.protocol}://${host}/${imagePath}`;
+    const thumbnailFilename = `thumb_${photo.filename}`;
+    const thumbnailPath = `drivers/${thumbnailFilename}`;
+    const thumbnailUrl = `${req.protocol}://${host}/${thumbnailPath}`;
 
-     await sharp(photo.path)
-     .resize(200, 200)
-     .toFile(path.join(__dirname, `../public/${thumbnailPath}`));
-    
-   const driveruser =  await Driver.create({
+    await sharp(photo.path)
+      .resize(200, 200)
+      .toFile(path.join(__dirname, `../public/${thumbnailPath}`));
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const driveruser = await Driver.create({
       cityId: city_id,
       firstName,
       lastName,
       maritalStatus: status,
       numberPlate: plate,
       phone,
-      password,
+      password: hashedPassword,
       birthday: birth_date,
       quarter: address,
       photo: imageUrl,
@@ -238,12 +237,13 @@ const create = async (req, res) => {
       thumbnail: driveruser.thumbnail,
       city: driveruser.cityId,
       plate: driveruser.numberPlate,
-      token: token
+      token: token,
     };
 
     return res.status(201).json({
       status: "success",
-      message: "Votre compte a été créé avec succès et est actuellement en attente de validation. Nous vous invitons à vous rendre à l'agence BOAS Service pour finaliser la vérification de votre compte.",
+      message:
+        "Votre compte a été créé avec succès et est actuellement en attente de validation. Nous vous invitons à vous rendre à l'agence BOAS Service pour finaliser la vérification de votre compte.",
       data: responseFormated,
     });
   } catch (error) {
@@ -295,7 +295,10 @@ const validateAccount = async (req, res) => {
 const listActiveDrivers = async (req, res) => {
   try {
     const drivers = await Driver.findAll(
-      { where: { isActive: true }, attributes: { exclude: ["password", "isActive", "createdAt"] } },
+      {
+        where: { isActive: true },
+        attributes: { exclude: ["password", "isActive", "createdAt"] },
+      },
       { order: [["name", "DESC"]] }
     );
 
@@ -324,7 +327,12 @@ const listActiveDrivers = async (req, res) => {
 const listInActiveDrivers = async (req, res) => {
   try {
     const drivers = await Driver.findAll(
-      { where: { isActive: false }, attributes: { exclude: ["password", "isActive", "createdAt", "token", "updatedAt"] } },
+      {
+        where: { isActive: false },
+        attributes: {
+          exclude: ["password", "isActive", "createdAt", "token", "updatedAt"],
+        },
+      },
       { order: [["name", "DESC"]] }
     );
 
@@ -349,7 +357,6 @@ const listInActiveDrivers = async (req, res) => {
     });
   }
 };
-
 
 const updateToken = async (req, res) => {
   try {
@@ -417,7 +424,7 @@ const updateToken = async (req, res) => {
       message: "Une erreur s'est produite lors de la mise à jour du token.",
     });
   }
-}
+};
 
 const uploadPhoto = async (req, res) => {
   try {
@@ -510,8 +517,7 @@ const uploadPhoto = async (req, res) => {
       message: "Une erreur s'est produite lors de la mise à jour de la photo.",
     });
   }
-}
-
+};
 
 const createPassword = async (req, res) => {
   try {
@@ -580,6 +586,15 @@ const createPassword = async (req, res) => {
       message: "Une erreur s'est produite lors de la mise à jour de la photo.",
     });
   }
-}
+};
 
-module.exports = { create, validateAccount, listActiveDrivers, login, listInActiveDrivers, updateToken, uploadPhoto, createPassword };
+module.exports = {
+  create,
+  validateAccount,
+  listActiveDrivers,
+  login,
+  listInActiveDrivers,
+  updateToken,
+  uploadPhoto,
+  createPassword,
+};
