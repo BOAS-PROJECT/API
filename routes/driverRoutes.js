@@ -4,7 +4,7 @@ const upload = require("../utils/driverMulterConfig");
 const router = express.Router();
 
 // CREATION DU COMPTE
-router.post("/register", driverController.create);
+router.post("/register", upload.single("photo"), driverController.create);
 
 // CONNEXION
 router.post("/login", driverController.login);

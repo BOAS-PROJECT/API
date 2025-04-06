@@ -48,10 +48,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      city: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
       quarter: {
         type: Sequelize.STRING,
         allowNull: false

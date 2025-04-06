@@ -83,16 +83,18 @@ const login = async (req, res) => {
 
 const create = async (req, res) => {
   try {
+    const host = req.get("host");
+    const photo = req.file;
     const {
-      cityId,
       firstName,
       lastName,
-      status,
-      plate,
       phone,
-      birthday,
-      city,
-      quarter,
+      plate,
+      address,
+      city_id,
+      status,
+      birth_date,
+      password,
     } = req.body;
 
     if (!firstName) {
@@ -109,19 +111,6 @@ const create = async (req, res) => {
       });
     }
 
-    if (!status) {
-      return res.status(400).json({
-        status: "error",
-        message: "La situation matrimoniale est obligatoire.",
-      });
-    }
-
-    if (!plate) {
-      return res.status(400).json({
-        status: "error",
-        message: "La plaque d'immatriculation est obligatoire.",
-      });
-    }
 
     if (!phone) {
       return res.status(400).json({
@@ -130,35 +119,60 @@ const create = async (req, res) => {
       });
     }
 
-    if (!birthday) {
+  
+    if (!plate) {
+      return res.status(400).json({
+        status: "error",
+        message: "La plaque d'immatriculation est obligatoire.",
+      });
+    }
+
+    if (!address) {
+      return res.status(400).json({
+        status: "error",
+        message: "L'adresse est obligatoire.",
+      });
+    }
+
+    if (!city_id) {
+      return res.status(400).json({
+        status: "error",
+        message: "La ville est de résidence obligatoire.",
+      });
+    }
+
+    if (!status) {
+      return res.status(400).json({
+        status: "error",
+        message: "La situation matrimoniale est obligatoire.",
+      });
+    }
+
+
+    if (!birth_date) {
       return res.status(400).json({
         status: "error",
         message: "La date de naissance est obligatoire.",
       });
     }
 
-    if (!city) {
+
+    if (!password) {
       return res.status(400).json({
         status: "error",
-        message: "La ville est obligatoire.",
+        message: "Le mot de passe est obligatoire.",
       });
     }
 
-    if (!quarter) {
+    if (password.length < 4) {
       return res.status(400).json({
         status: "error",
-        message: "Le quartier est obligatoire.",
+        message: "Le mot de passe doit contenir au moins 4 caractères.",
       });
     }
 
-    
-    if (!cityId) {
-      return res
-        .status(400)
-        .json({ error: "La ville est de résidence obligatoire." });
-    }
 
-    const existingCity = await City.findByPk(cityId);
+    const existingCity = await City.findByPk(city_id);
     if (!existingCity) {
       return res.status(400).json({
         status: "error",
@@ -183,17 +197,31 @@ const create = async (req, res) => {
         message: "Cette plaque d'immatriculation est déjà utilisée.",
       });
     }
+
+     // Générez et enregistrez l'image et le thumbnail
+     const imagePath = `drivers/${photo.filename}`;
+     const imageUrl = `${req.protocol}://${host}/${imagePath}`;
+     const thumbnailFilename = `thumb_${photo.filename}`;
+     const thumbnailPath = `drivers/${thumbnailFilename}`;
+     const thumbnailUrl = `${req.protocol}://${host}/${thumbnailPath}`;
+
+     await sharp(photo.path)
+     .resize(200, 200)
+     .toFile(path.join(__dirname, `../public/${thumbnailPath}`));
     
    const driveruser =  await Driver.create({
-      cityId,
+      cityId: city_id,
       firstName,
       lastName,
       maritalStatus: status,
       numberPlate: plate,
       phone,
-      birthday: birthday,
-      city: city,
-      quarter,
+      password,
+      birthday: birth_date,
+      quarter: address,
+      photo: imageUrl,
+      thumbnail: thumbnailUrl,
+      isActive: false,
     });
 
     const token = jwt.sign({ id: driveruser.id }, process.env.JWT_SECRET);
@@ -204,14 +232,18 @@ const create = async (req, res) => {
     const responseFormated = {
       firstName: driveruser.firstName,
       lastName: driveruser.lastName,
-      status: driveruser.isActive,
-      token: token,
+      phone: driveruser.phone,
+      photo: driveruser.photo,
+      thumbnail: driveruser.thumbnail,
+      city: driveruser.city,
+      token: token
     };
 
     return res.status(201).json({
       status: "success",
       message: "Votre compte a été créé avec succès et est actuellement en attente de validation. Nous vous invitons à vous rendre à l'agence BOAS Service pour finaliser la vérification de votre compte.",
       data: responseFormated,
+      token: token,
     });
   } catch (error) {
     console.error(`ERROR CREATE ACCOUNT DRIVER: ${error}`);
