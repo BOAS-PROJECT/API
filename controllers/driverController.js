@@ -57,6 +57,7 @@ const login = async (req, res) => {
     );
 
     const response = {
+      id: driver.id,
       firstName: driver.firstName,
       lastName: driver.lastName,
       phone: driver.phone,
@@ -228,6 +229,7 @@ const create = async (req, res) => {
     await driveruser.save();
 
     const responseFormated = {
+      id: driveruser.id,
       firstName: driveruser.firstName,
       lastName: driveruser.lastName,
       phone: driveruser.phone,
