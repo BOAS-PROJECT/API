@@ -227,6 +227,8 @@ const create = async (req, res) => {
       photo: imageUrl,
       thumbnail: thumbnailUrl,
       isActive: false,
+    }, {
+      include: [{ model: City, attributes: ['name'] }]
     });
 
     const token = jwt.sign({ id: driveruser.id }, process.env.JWT_SECRET);
@@ -240,7 +242,7 @@ const create = async (req, res) => {
       photo: driveruser.photo,
       thumbnail: driveruser.thumbnail,
       city: driveruser.cityId,
-      cityName: driveruser.City.name,
+      cityName: driveruser.City ? driveruser.City.name : null, 
       plate: driveruser.numberPlate,
       quarter: driveruser.quarter,
       birthday: driveruser.birthday,
