@@ -24,6 +24,9 @@ router.get("/list-inactive-drivers", driverController.listInActiveDrivers);
 // MISE A JOUR DU TOKEN
 router.put("/update-token", driverController.updateToken);
 
+// MISE A JOUR DU MOT DE PASSE
+router.put("/update-password", driverController.updatePassword);
+
 // UPLOAD DE LA PHOTO
 router.put("/upload-photo", upload.single("photo"), driverController.uploadPhoto);
 
