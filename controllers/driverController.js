@@ -183,7 +183,7 @@ const create = async (req, res) => {
       });
     }
 
-    const existingDriver = await Driver.findOne({ where: { phone }, include: City });
+    const existingDriver = await Driver.findOne({ where: { phone }});
     if (existingDriver) {
       return res.status(400).json({
         status: "error",
@@ -234,6 +234,8 @@ const create = async (req, res) => {
     const token = jwt.sign({ id: driveruser.id }, process.env.JWT_SECRET);
     await driveruser.save();
 
+    const cityName = existingCity.name;
+
     const responseFormated = {
       id: driveruser.id,
       firstName: driveruser.firstName,
@@ -242,7 +244,7 @@ const create = async (req, res) => {
       photo: driveruser.photo,
       thumbnail: driveruser.thumbnail,
       city: driveruser.cityId,
-      cityName: driveruser.City ? driveruser.City.name : null, 
+      cityName: cityName, 
       plate: driveruser.numberPlate,
       quarter: driveruser.quarter,
       birthday: driveruser.birthday,
