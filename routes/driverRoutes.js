@@ -9,6 +9,9 @@ router.post("/register", upload.single("photo"), driverController.create);
 // CONNEXION
 router.post("/login", driverController.login);
 
+// DISPONIBILITE DU CONDUCTEUR
+router.put("/availability", driverController.updateAvailability);
+
 // VALIDATION DU COMPTE
 router.put("/validate-account", driverController.validateAccount);
 

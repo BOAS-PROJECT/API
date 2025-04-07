@@ -68,6 +68,9 @@ const login = async (req, res) => {
       thumbnail: driver.thumbnail,
       city: driver.city,
       plate: driver.numberPlate,
+      quarter: driver.quarter,
+      birthday: driver.birthday,
+      maritalStatus: driver.maritalStatus,
       token: token,
     };
 
@@ -237,6 +240,9 @@ const create = async (req, res) => {
       thumbnail: driveruser.thumbnail,
       city: driveruser.cityId,
       plate: driveruser.numberPlate,
+      quarter: driveruser.quarter,
+      birthday: driveruser.birthday,
+      maritalStatus: driveruser.maritalStatus,
       token: token,
     };
 
@@ -588,6 +594,70 @@ const createPassword = async (req, res) => {
   }
 };
 
+const updateAvailability = async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+    const { availability } = req.body;
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token non fourni." });
+    }
+
+    // Vérifie si l'en-tête commence par "Bearer "
+    if (!token.startsWith("Bearer ")) {
+      return res.status(401).json({
+        status: "error",
+        message: "Format de token invalide.",
+      });
+    }
+
+    // Extrait le token en supprimant le préfixe "Bearer "
+    const customToken = token.substring(7);
+    let decodedToken;
+
+    try {
+      decodedToken = jwt.verify(customToken, process.env.JWT_SECRET);
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .json({ status: "error", message: "TokenExpiredError" });
+      }
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token invalide." });
+    }
+
+    const driverId = decodedToken.id;
+
+    const driver = await Driver.findByPk(driverId);
+    if (!driver) {
+      return res.status(404).json({
+        status: "error",
+        message:
+          "Compte non trouvé. Veuillez réessayer ou en créer un nouveau.",
+      });
+    }
+
+    driver.availability = availability;
+    await driver.save();
+    return res.status(200).json({
+      status: "success",
+      message: "Votre disponibilité a été mise à jour succès.",
+    });
+  } catch (error) {
+    console.error(`ERROR UPDATE AVAILABILITY DRIVER: ${error}`);
+    appendErrorLog(`ERROR UPDATE AVAILABILITY DRIVER: ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message:
+        "Une erreur s'est produite lors de la mise à jour de la disponibilité.",
+    });
+  }
+}
+
 module.exports = {
   create,
   validateAccount,
@@ -597,4 +667,5 @@ module.exports = {
   updateToken,
   uploadPhoto,
   createPassword,
+  updateAvailability
 };

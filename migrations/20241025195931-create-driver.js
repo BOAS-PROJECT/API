@@ -57,6 +57,11 @@ module.exports = {
         allowNull: false,
         defaultValue: false
       },
+      availability: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
       photo: {
         type: Sequelize.STRING,
         allowNull: true
