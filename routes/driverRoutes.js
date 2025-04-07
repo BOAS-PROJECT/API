@@ -33,4 +33,7 @@ router.put("/upload-photo", upload.single("photo"), driverController.uploadPhoto
 // CREATE PASSWORD
 router.put("/create-password", driverController.createPassword);
 
+// CHECK VALIDITY
+router.post("/check-validity", driverController.checkValidity);
+
 module.exports = router;

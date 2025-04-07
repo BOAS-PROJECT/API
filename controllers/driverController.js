@@ -752,6 +752,74 @@ const updatePassword = async (req, res) => {
   }
 }
 
+
+const checkValidity = async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+    if (!token) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token non fourni." });
+    }
+
+    // Vérifie si l'en-tête commence par "Bearer "
+    if (!token.startsWith("Bearer ")) {
+      return res.status(401).json({
+        status: "error",
+        message: "Format de token invalide.",
+      });
+    }
+
+    // Extrait le token en supprimant le préfixe "Bearer "
+    const customToken = token.substring(7);
+    let decodedToken;
+
+    try {
+      decodedToken = jwt.verify(customToken, process.env.JWT_SECRET);
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .json({ status: "error", message: "TokenExpiredError" });
+      }
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token invalide." });
+    }
+
+    const customerId = decodedToken.id;
+
+    const driver = await Driver.findByPk(customerId);
+    if (!driver) {
+      return res.status(404).json({
+        status: "error",
+        message:
+          "Compte non trouvé. Veuillez réessayer ou en créer un nouveau.",
+      });
+    }
+
+    // verififier si le compte est actif ou non
+    if (driver.isActive == true) {
+      return res.status(200).json({
+        status: "success",
+        message: "Votre compte est actif.",
+      });
+    } else {
+      return res.status(404).json({
+        status: "success",
+        message: "Veuillez contacter l'agence BOAS Service pour finaliser la vérification et l'activation de votre compte.",
+      });
+    }
+  } catch (error) {
+    console.error(`ERROR CHECK VALIDITY: ${error}`);
+    appendErrorLog(`ERROR CHECK VALIDITY: ${error}`);
+    return res.status(500).json({
+      status: "error",
+      message: "Une erreur s'est produite lors de la verification du token.",
+    });
+  }
+}
+
 module.exports = {
   create,
   validateAccount,
@@ -763,4 +831,5 @@ module.exports = {
   createPassword,
   updateAvailability,
   updatePassword,
+  checkValidity,
 };
