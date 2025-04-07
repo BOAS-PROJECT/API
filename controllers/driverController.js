@@ -34,7 +34,7 @@ const login = async (req, res) => {
       });
     }
 
-    const driver = await Driver.findOne({ where: { phone, isActive: true } });
+    const driver = await Driver.findOne({ where: { phone, isActive: true }, include: City });
     if (!driver) {
       return res.status(400).json({
         status: "error",
@@ -66,7 +66,8 @@ const login = async (req, res) => {
       phone: driver.phone,
       photo: driver.photo,
       thumbnail: driver.thumbnail,
-      city: driver.city,
+      city: driver.cityId,
+      cityName: driver.City.name,
       plate: driver.numberPlate,
       quarter: driver.quarter,
       birthday: driver.birthday,
@@ -182,7 +183,7 @@ const create = async (req, res) => {
       });
     }
 
-    const existingDriver = await Driver.findOne({ where: { phone } });
+    const existingDriver = await Driver.findOne({ where: { phone }, include: City });
     if (existingDriver) {
       return res.status(400).json({
         status: "error",
@@ -239,6 +240,7 @@ const create = async (req, res) => {
       photo: driveruser.photo,
       thumbnail: driveruser.thumbnail,
       city: driveruser.cityId,
+      cityName: driveruser.City.name,
       plate: driveruser.numberPlate,
       quarter: driveruser.quarter,
       birthday: driveruser.birthday,
