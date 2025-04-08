@@ -156,17 +156,24 @@ io.on("connection", (socket) => {
 
   socket.on("driverLocation", (data) => {
     console.log("📍 Received driverLocation:", data);
-    io.emit("driverLocation", data);
+    const normalizedData = {
+      driverId: data.id || data.driverId,
+      latitude: data.latitude,
+      longitude: data.longitude
+    };
+    
+    io.emit("driverLocation", normalizedData);
   });
 
   socket.on("requestInitialDrivers", () => {
     // Récupérez les positions actuelles de tous les conducteurs depuis la base de données
-    Driver.findAll().then((drivers) => {
+      Driver.findAll().then((drivers) => {
       const driverLocations = drivers.map((driver) => ({
         driverId: driver.id,
         latitude: driver.latitude,
         longitude: driver.longitude,
       }));
+      console.log(`🟢 Driver List  ` + driverLocations);
       socket.emit("initialDrivers", driverLocations);
     });
   });
