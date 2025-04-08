@@ -1,7 +1,6 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
+const io = require('../app');
 module.exports = (sequelize, DataTypes) => {
   class Driver extends Model {
     /**
@@ -32,10 +31,23 @@ module.exports = (sequelize, DataTypes) => {
     availability: DataTypes.INTEGER,
     photo: DataTypes.STRING,
     thumbnail: DataTypes.STRING,
-    token: DataTypes.STRING
+    token: DataTypes.STRING,
+    latitude: DataTypes.FLOAT,
+    longitude: DataTypes.FLOAT 
   }, {
     sequelize,
     modelName: 'Driver',
+    hooks: {
+      afterUpdate: (driver, options) => {
+        if (driver.changed('latitude') || driver.changed('longitude')) {
+          io.emit('driverLocation', {
+            driverId: driver.id,
+            latitude: driver.latitude,
+            longitude: driver.longitude
+          });
+        }
+      }
+    }
   });
   return Driver;
 };

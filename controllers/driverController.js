@@ -652,6 +652,7 @@ const updateAvailability = async (req, res) => {
     return res.status(200).json({
       status: "success",
       message: "Votre disponibilité a été mise à jour succès.",
+      data: availability
     });
   } catch (error) {
     console.error(`ERROR UPDATE AVAILABILITY DRIVER: ${error}`);
